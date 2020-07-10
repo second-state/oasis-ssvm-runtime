@@ -65,5 +65,6 @@ ${oasis_node} debug control set-epoch \
 # Start the gateway.
 echo "Starting the web3 gateway."
 ${web3_gateway} \
+    --interface 0.0.0.0 \
     --node-address unix:${client_socket} \
     --runtime-id 8000000000000000000000000000000000000000000000000000000000000000

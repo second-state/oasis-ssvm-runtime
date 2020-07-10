@@ -9,11 +9,11 @@ oasis-core-keymanager-client = { git = "https://github.com/oasisprotocol/oasis-c
 oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.12.5" }
 
 # Parity.
-ethcore = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+ethcore = { path = "../../oasis-parity/ethcore" }
 ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
-hashdb = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-keccak-hash = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-vm = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+hashdb = { path = "../../oasis-parity/util/hashdb" }
+keccak-hash = { path = "../../oasis-parity/util/hash" }
+vm = { path = "../../oasis-parity/ethcore/vm" }
 
 # Others.
 anyhow = "1.0"

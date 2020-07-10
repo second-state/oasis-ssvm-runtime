@@ -405,7 +405,6 @@ dependencies = [
 [[package]]
 name = "bloomchain"
 version = "0.2.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethbloom 0.5.3",
 ]
@@ -593,7 +592,6 @@ dependencies = [
 [[package]]
 name = "common-types"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethcore-bytes",
  "ethereum-types 0.3.2",
@@ -1115,7 +1113,6 @@ dependencies = [
 [[package]]
 name = "ethcore"
 version = "1.12.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "blockchain-traits",
  "bloomchain",
@@ -1170,7 +1167,6 @@ dependencies = [
 [[package]]
 name = "ethcore-bloom-journal"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "siphasher",
 ]
@@ -1178,12 +1174,10 @@ dependencies = [
 [[package]]
 name = "ethcore-bytes"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 
 [[package]]
 name = "ethcore-crypto"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethereum-types 0.3.2",
  "quick-error",
@@ -1195,12 +1189,10 @@ dependencies = [
 [[package]]
 name = "ethcore-devtools"
 version = "1.12.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 
 [[package]]
 name = "ethcore-logger"
 version = "1.12.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ansi_term 0.10.2",
  "arrayvec 0.4.12",
@@ -1216,7 +1208,6 @@ dependencies = [
 [[package]]
 name = "ethcore-transaction"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethereum-types 0.3.2",
  "ethjson",
@@ -1283,7 +1274,6 @@ dependencies = [
 [[package]]
 name = "ethjson"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethereum-types 0.3.2",
  "rustc-hex 1.0.0",
@@ -1295,7 +1285,6 @@ dependencies = [
 [[package]]
 name = "ethkey"
 version = "0.3.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "byteorder",
  "ethereum-types 0.3.2",
@@ -1311,7 +1300,6 @@ dependencies = [
 [[package]]
 name = "evm"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "bit-set",
  "ethereum-types 0.3.2",
@@ -1727,7 +1715,6 @@ checksum = "d7afe4a420e3fe79967a00898cc1f4db7c8a49a9333a29f8a4bd76a253d5cd04"
 [[package]]
 name = "hashdb"
 version = "0.1.1"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "ethereum-types 0.3.2",
@@ -2070,7 +2057,6 @@ checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 [[package]]
 name = "journaldb"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethcore-bytes",
  "ethereum-types 0.3.2",
@@ -2190,7 +2176,6 @@ checksum = "67c21572b4949434e4fc1e1978b99c5f77064153c59d998bf13ecd96fb5ecba7"
 [[package]]
 name = "keccak-hash"
 version = "0.1.2"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethereum-types 0.3.2",
  "tiny-keccak 1.5.0",
@@ -2209,7 +2194,6 @@ dependencies = [
 [[package]]
 name = "kvdb"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "error-chain 0.10.0",
@@ -2219,7 +2203,6 @@ dependencies = [
 [[package]]
 name = "kvdb-memorydb"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "kvdb",
 ]
@@ -2328,7 +2311,6 @@ dependencies = [
 [[package]]
 name = "macros"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 
 [[package]]
 name = "match_cfg"
@@ -2351,7 +2333,6 @@ checksum = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
 [[package]]
 name = "mem"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 
 [[package]]
 name = "memchr"
@@ -2381,7 +2362,6 @@ dependencies = [
 [[package]]
 name = "memory-cache"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "heapsize",
  "lru-cache",
@@ -2396,7 +2376,6 @@ checksum = "71d96e3f3c0b6325d8ccd83c33b28acb183edcb6c67938ba104ec546854b0882"
 [[package]]
 name = "memorydb"
 version = "0.1.1"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "ethereum-types 0.3.2",
@@ -3045,7 +3024,6 @@ dependencies = [
 [[package]]
 name = "parity-machine"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethereum-types 0.3.2",
 ]
@@ -3053,7 +3031,6 @@ dependencies = [
 [[package]]
 name = "parity-reactor"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "futures",
  "tokio-core",
@@ -3062,7 +3039,6 @@ dependencies = [
 [[package]]
 name = "parity-rpc"
 version = "1.12.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ansi_term 0.10.2",
  "cid",
@@ -3127,7 +3103,6 @@ dependencies = [
 [[package]]
 name = "parity-version"
 version = "1.12.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "ethcore-bytes",
  "rlp 0.2.1",
@@ -3220,7 +3195,6 @@ dependencies = [
 [[package]]
 name = "patricia-trie"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "ethcore-bytes",
@@ -3303,7 +3277,6 @@ checksum = "d36492546b6af1463394d46f0c834346f31548646f6ba10849802c9c9a27ac33"
 [[package]]
 name = "plain_hasher"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "crunchy 0.1.6",
  "ethereum-types 0.3.2",
@@ -3694,7 +3667,6 @@ dependencies = [
 [[package]]
 name = "rlp"
 version = "0.2.1"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "byteorder",
  "elastic-array",
@@ -3714,7 +3686,6 @@ dependencies = [
 [[package]]
 name = "rlp_compress"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "lazy_static 1.4.0",
@@ -3724,7 +3695,6 @@ dependencies = [
 [[package]]
 name = "rlp_derive"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "quote 0.5.2",
  "syn 0.13.11",
@@ -4230,7 +4200,6 @@ checksum = "c19be23126415861cb3a23e501d34a708f7f9b2183c5252d690941c2e69199d5"
 [[package]]
 name = "stats"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "log 0.3.9",
 ]
@@ -4811,7 +4780,6 @@ checksum = "aeb4b191d033a35edfce392a38cdcf9790b6cebcb30fa690c312c29da4dc433e"
 [[package]]
 name = "triehash"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "elastic-array",
  "ethereum-types 0.3.2",
@@ -4875,7 +4843,6 @@ dependencies = [
 [[package]]
 name = "unexpected"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 
 [[package]]
 name = "unicase"
@@ -4981,7 +4948,6 @@ checksum = "b4ae116fef2b7fea257ed6440d3cfcff7f190865f170cdad00bb6465bf18ecba"
 [[package]]
 name = "util-error"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "error-chain 0.10.0",
  "ethereum-types 0.3.2",
@@ -5027,7 +4993,6 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 [[package]]
 name = "vm"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "blockchain-traits",
  "byteorder",
@@ -5093,7 +5058,6 @@ dependencies = [
 [[package]]
 name = "wasm"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "base64 0.10.1",
  "bcfs",
@@ -5185,7 +5149,6 @@ checksum = "1d649a3145108d7d3fbcde896a468d1bd636791823c9921135218ad89be08307"
 [[package]]
 name = "wasm-macros"
 version = "0.1.0"
-source = "git+https://github.com/second-state/oasis-parity?branch=ssvm#c57cfab3dd9e41ea8646355954a1a3bb9d74bf59"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.7",
