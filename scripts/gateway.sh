@@ -17,15 +17,22 @@ mkdir -p "${data_dir}"
 chmod -R go-rwx "${data_dir}"
 client_socket="${data_dir}/net-runner/network/client-0/internal.sock"
 
-# Run the network.
-echo "Starting the test network."
-${oasis_runner} \
+# Dump
+echo "Dump fixture."
+${oasis_runner} dump-fixture \
     --fixture.default.node.binary ${oasis_node} \
     --fixture.default.runtime.binary ${runtime_binary} \
     --fixture.default.runtime.loader ${runtime_loader} \
     --fixture.default.runtime.genesis_state ${runtime_genesis} \
     --fixture.default.keymanager.binary ${keymanager_binary} \
     --fixture.default.epochtime_mock \
+    > fixture.json
+sed -i 's/"runtime_provisioner": ""/"runtime_provisioner": "unconfined"/' fixture.json
+
+# Run the network.
+echo "Starting the test network from fixture.json."
+${oasis_runner} \
+    --fixture.file fixture.json \
     --basedir.no_temp_dir \
     --basedir ${data_dir} &
 
