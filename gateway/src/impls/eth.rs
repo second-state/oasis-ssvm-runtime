@@ -35,7 +35,7 @@ use parity_rpc::v1::{
     types::{
         BlockNumber, Bytes, CallRequest, Filter, Index, Log as RpcLog, Receipt as RpcReceipt,
         RichBlock, Transaction as RpcTransaction, Work, H160 as RpcH160, H256 as RpcH256,
-        H64 as RpcH64, U256 as RpcU256,
+        H64 as RpcH64, U256 as RpcU256, U64 as RpcU64,
     },
 };
 use prometheus::{
@@ -159,6 +159,11 @@ impl Eth for EthClient {
     fn accounts(&self, _meta: Metadata) -> Result<Vec<RpcH160>> {
         ETH_RPC_CALLS.with(&labels! {"call" => "accounts",}).inc();
         Ok(vec![])
+    }
+
+    fn chain_id(&self) -> Result<Option<RpcU64>> {
+        ETH_RPC_CALLS.with(&labels! {"call" => "chainId",}).inc();
+        Ok(Some((1 as u64).into()))
     }
 
     fn block_number(&self) -> BoxFuture<RpcU256> {
