@@ -17,24 +17,26 @@ const web3 = new Web3(provider);
 
   let receipt;
   receipt = await web3.eth.sendTransaction({ from: accounts[0], data: wasm });
-  console.log(`receipt: ${JSON.stringify(receipt, null, 2)}`)
-
   let contract = new web3.eth.Contract(abi, receipt.contractAddress);
+  console.log(`ERC-20 contract created at ${receipt.contractAddress}\n`);
+
+  // check balances
   let result;
   result = await contract.methods.balanceOf(accounts[0]).call();
-  console.log(`balanceOf(${accounts[0]}) = ${result}`);
+  console.log(`contract.balanceOf(${accounts[0]}) = ${result}`);
   result = await contract.methods.balanceOf(accounts[1]).call();
-  console.log(`balanceOf(${accounts[1]}) = ${result}`);
+  console.log(`contract.balanceOf(${accounts[1]}) = ${result}\n`);
 
   let amount = 1;
   await contract.methods.transfer(accounts[1], amount).send({from: accounts[0]}).on('receipt', function(receipt){
-    console.log(`transfer ${amount} from address(${accounts[0]}) to address(${accounts[1]})`);
-    console.log(receipt);
+    console.log(`Transfer ${amount} token from address(${accounts[0]}) to address(${accounts[1]})\n`);
   });
 
+  // check balances
   result = await contract.methods.balanceOf(accounts[0]).call();
-  console.log(`balanceOf(${accounts[0]}) = ${result}`);
+  console.log(`contract.balanceOf(${accounts[0]}) = ${result}`);
   result = await contract.methods.balanceOf(accounts[1]).call();
-  console.log(`balanceOf(${accounts[1]}) = ${result}`);
+  console.log(`contract.balanceOf(${accounts[1]}) = ${result}`);
+
   await provider.engine.stop();
 })();
