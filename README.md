@@ -131,3 +131,7 @@ transfer 1 from address(0x1cCA28600d7491365520B31b466f88647B9839eC) to address(0
 balanceOf(0x1cCA28600d7491365520B31b466f88647B9839eC) = 999
 balanceOf(0xB8b3666d8fEa887D97Ab54f571B8E5020c5c8b58) = 1
 ```
+
+## Our testing node
+
+We've deployed a testing node to demo our runtime at http://oasis-ssvm-demo.secondstate.io:8545/.
