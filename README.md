@@ -24,7 +24,7 @@ docker pull secondstate/oasis-ssvm
 - Get source code from Github.
 
 ```bash
-git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.7
+git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.9
 git clone https://github.com/second-state/oasis-ssvm-runtime.git --branch ssvm
 ```
 
@@ -47,7 +47,7 @@ docker run -it --rm \
 ## Build runtime from source and running the network (in docker)
 
 ```bash
-cd ~/code/oasis-runtime
+cd ~/code/oasis-ssvm-runtime
 rustup target add x86_64-fortanix-unknown-sgx
 make -C ../oasis-core
 make symlink-artifacts OASIS_CORE_SRC_PATH=../oasis-core
