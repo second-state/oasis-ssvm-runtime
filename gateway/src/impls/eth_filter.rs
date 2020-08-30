@@ -16,10 +16,14 @@
 
 //! Eth Filter RPC implementation
 
-use std::sync::Arc;
+use std::{
+    collections::{BTreeSet, VecDeque},
+    sync::Arc,
+};
 
 use anyhow::anyhow;
-use ethcore::{filter::Filter as EthcoreFilter, ids::BlockId};
+use common_types::{filter::Filter as EthcoreFilter, ids::BlockId};
+use ethereum_types::{H256, U256};
 use jsonrpc_core::{
     futures::{future, prelude::*, stream},
     BoxFuture, Result,
@@ -29,7 +33,7 @@ use oasis_core_runtime::common::logger::get_logger;
 use parity_rpc::v1::{
     helpers::{errors, limit_logs, PollFilter, PollManager},
     traits::EthFilter,
-    types::{Filter, FilterChanges, Index, Log, H256 as RpcH256, U256 as RpcU256},
+    types::{BlockNumber, Filter, FilterChanges, Index, Log},
 };
 use parking_lot::Mutex;
 use prometheus::{labels, register_int_counter_vec, IntCounterVec};
@@ -60,13 +64,13 @@ impl EthFilterClient {
         EthFilterClient {
             logger: get_logger("gateway/impls/eth_filter"),
             translator,
-            polls: Arc::new(Mutex::new(PollManager::new())),
+            polls: Arc::new(Mutex::new(PollManager::new(Default::default()))),
         }
     }
 }
 
 impl EthFilter for EthFilterClient {
-    fn new_filter(&self, filter: Filter) -> BoxFuture<RpcU256> {
+    fn new_filter(&self, filter: Filter) -> BoxFuture<U256> {
         ETH_FILTER_RPC_CALLS
             .with(&labels! {"call" => "newFilter",})
             .inc();
@@ -78,18 +82,23 @@ impl EthFilter for EthFilterClient {
                 .map_err(jsonrpc_error)
                 .map(move |blk| {
                     let mut polls = polls.lock();
-                    let id = polls.create_poll(PollFilter::Logs(
-                        blk.number_u64(),
-                        Default::default(),
+                    let block_number = blk.number_u64();
+                    let include_pending = filter.to_block == Some(BlockNumber::Pending);
+                    let filter = filter.try_into().unwrap();
+                    let id = polls.create_poll(PollFilter::Logs {
+                        block_number,
                         filter,
-                    ));
+                        include_pending,
+                        last_block_hash: None,
+                        previous_logs: Default::default(),
+                    });
 
                     id.into()
                 }),
         )
     }
 
-    fn new_block_filter(&self) -> BoxFuture<RpcU256> {
+    fn new_block_filter(&self) -> BoxFuture<U256> {
         ETH_FILTER_RPC_CALLS
             .with(&labels! {"call" => "newBlockFilter",})
             .inc();
@@ -102,21 +111,26 @@ impl EthFilter for EthFilterClient {
                 .map(move |blk| {
                     let mut polls = polls.lock();
                     // +1, since we don't want to include the current block.
-                    let id = polls.create_poll(PollFilter::Block(blk.number_u64() + 1));
+                    let id = polls.create_poll(PollFilter::Block {
+                        last_block_number: blk.number_u64() + 1,
+                        recent_reported_hashes: VecDeque::with_capacity(
+                            PollFilter::MAX_BLOCK_HISTORY_SIZE,
+                        ),
+                    });
 
                     id.into()
                 }),
         )
     }
 
-    fn new_pending_transaction_filter(&self) -> Result<RpcU256> {
+    fn new_pending_transaction_filter(&self) -> Result<U256> {
         ETH_FILTER_RPC_CALLS
             .with(&labels! {"call" => "newPendingTransactionFilter",})
             .inc();
 
         // We don't have pending transactions, so this is a no-op filter.
         let mut polls = self.polls.lock();
-        let id = polls.create_poll(PollFilter::PendingTransaction(vec![]));
+        let id = polls.create_poll(PollFilter::PendingTransaction(BTreeSet::new()));
         Ok(id.into())
     }
 
@@ -136,29 +150,38 @@ impl EthFilter for EthFilterClient {
                     let mut polls = polls.lock();
                     match polls.poll_mut(&index.value()) {
                         None => Box::new(future::err(errors::filter_not_found())),
-                        Some(PollFilter::Block(ref mut number)) => {
+                        Some(PollFilter::Block {
+                            ref mut last_block_number,
+                            ref mut recent_reported_hashes,
+                        }) => {
                             // TODO: Should we support block range fetch?
                             let updates = Box::new(
-                                stream::iter_ok(*number..=blk.number_u64())
+                                stream::iter_ok(*last_block_number..=blk.number_u64())
                                     .and_then(move |round| translator.get_block_by_round(round))
                                     .and_then(|blk| match blk {
                                         Some(blk) => Ok(blk),
                                         None => Err(anyhow!("block not found")),
                                     })
-                                    .map(|blk| RpcH256::from(blk.hash()))
+                                    .map(|blk| H256::from(blk.hash()))
                                     .collect()
                                     .map_err(jsonrpc_error)
                                     .map(FilterChanges::Hashes),
                             );
 
-                            *number = blk.number_u64();
+                            *last_block_number = blk.number_u64();
                             updates
                         }
                         Some(PollFilter::PendingTransaction(_)) => {
                             // We don't have pending transactions, so this is a no-op filter.
                             Box::new(future::ok(FilterChanges::Hashes(vec![])))
                         }
-                        Some(PollFilter::Logs(ref mut block_number, _, ref filter)) => {
+                        Some(PollFilter::Logs {
+                            ref mut block_number,
+                            ref mut last_block_hash,
+                            ref mut previous_logs,
+                            ref filter,
+                            include_pending,
+                        }) => {
                             // Build appropriate filter.
                             let mut filter: EthcoreFilter = filter.clone().into();
                             filter.from_block = BlockId::Number(*block_number);
@@ -193,7 +216,11 @@ impl EthFilter for EthFilterClient {
             let mut polls = self.polls.lock();
 
             match polls.poll(&index.value()) {
-                Some(&PollFilter::Logs(.., ref filter)) => filter.clone(),
+                Some(&PollFilter::Logs {
+                    ref filter,
+                    include_pending,
+                    ..
+                }) => filter.clone(),
                 Some(_) => return Box::new(future::ok(Vec::new())),
                 None => return Box::new(future::err(errors::filter_not_found())),
             }

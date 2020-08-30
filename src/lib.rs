@@ -10,6 +10,10 @@ extern crate ethkey;
 #[macro_use]
 extern crate serde_json;
 
+extern crate vm;
+extern crate account_state;
+extern crate executive_state;
+
 pub mod block;
 pub mod dispatcher;
 pub mod methods;

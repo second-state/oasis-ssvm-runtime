@@ -1,18 +1,21 @@
 //! Common data structures shared by runtime and gateway.
+extern crate account_state;
 extern crate anyhow;
 extern crate elastic_array;
 extern crate ethcore;
 extern crate ethereum_types;
-extern crate hashdb;
+extern crate hash_db as hashdb;
 extern crate io_context;
 extern crate keccak_hash;
+extern crate keccak_hasher;
+extern crate kvdb;
 extern crate lazy_static;
 extern crate oasis_core_keymanager_client;
 extern crate oasis_core_runtime;
+extern crate spec;
 extern crate vm;
 extern crate zeroize;
 
-pub mod confidential;
 pub mod genesis;
 pub mod parity;
 pub mod storage;

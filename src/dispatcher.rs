@@ -4,7 +4,8 @@ use std::sync::{
 };
 
 use anyhow::{anyhow, bail, Context as AnyContext, Error as AnyError, Result};
-use ethcore::transaction::SignedTransaction;
+use common_types::transaction::SignedTransaction;
+
 #[cfg(feature = "prefetch")]
 use ethcore::{
     state::{MKVS_KEY_CODE, MKVS_KEY_METADATA},

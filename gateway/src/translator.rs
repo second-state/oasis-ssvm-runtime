@@ -2,23 +2,25 @@
 //! runtime and an Ethereum chain exposed to clients.
 use std::{collections::BTreeMap, sync::Arc};
 
+use account_state::state::State;
 use anyhow::{anyhow, ensure, Error, Result};
-use ethcore::{
-    error::CallError,
-    executive::{contract_address, Executed, Executive, TransactOptions},
+use common_types::{
     filter::Filter,
+    ids::BlockId,
     log_entry::{LocalizedLogEntry, LogEntry},
     receipt::{LocalizedReceipt, TransactionOutcome},
-    state::State,
-    transaction::{Action, LocalizedTransaction, SignedTransaction, UnverifiedTransaction},
-    types::ids::BlockId,
-    vm::EnvInfo,
+    transaction::{Action, CallError, LocalizedTransaction, SignedTransaction, UnverifiedTransaction},
 };
 use ethereum_types::{H256, H64, U256};
 use futures::{future, prelude::*};
 use hash::KECCAK_EMPTY_LIST_RLP;
 use io_context::Context;
 use lazy_static::lazy_static;
+use machine::{
+    executed::Executed,
+    executive::{contract_address, Executive, TransactOptions},
+};
+use vm::{EnvInfo, CreateContractAddress};
 use oasis_core_client::{
     transaction::{
         snapshot::{BlockSnapshot, TransactionSnapshot},
@@ -285,13 +287,12 @@ impl Translator {
                         timestamp: blk.snapshot.block.header.timestamp,
                         difficulty: Default::default(),
                         // TODO: Get 256 last hashes.
-                        last_hashes: Arc::new(vec![blk
+                        last_hashes: Arc::new(vec![H256::from_slice(blk
                             .snapshot
                             .block
                             .header
                             .previous_hash
-                            .as_ref()
-                            .into()]),
+                            .as_ref())]),
                         gas_used: Default::default(),
                         gas_limit: U256::max_value(),
                     };
@@ -299,8 +300,8 @@ impl Translator {
                     let options = TransactOptions::with_no_tracing()
                         .dont_check_nonce()
                         .save_output_from_contract();
-
-                    Ok(Executive::new(&mut state, &env_info, machine)
+                    let schedule = machine.schedule(env_info.number);
+                    Ok(Executive::new(&mut state, &env_info, machine, &schedule)
                         .transact_virtual(&transaction, options)?)
                 }))
             })
@@ -355,7 +356,7 @@ impl Translator {
                             values: addresses
                                 .iter()
                                 .map(|addr: &ethereum_types::Address| {
-                                    let bytes: &[u8] = addr;
+                                    let bytes: &[u8] = addr.as_bytes();
                                     bytes.to_vec().into()
                                 })
                                 .collect(),
@@ -374,7 +375,7 @@ impl Translator {
                                     values: topic
                                         .iter()
                                         .map(|topic: &ethereum_types::H256| {
-                                            let bytes: &[u8] = topic;
+                                            let bytes: &[u8] = topic.as_bytes();
                                             bytes.to_vec().into()
                                         })
                                         .collect(),
@@ -424,7 +425,7 @@ impl Translator {
 
                 let transaction_hash = eth_tx.hash();
                 let transaction_index = txn.index as usize;
-                let block_hash = txn.block_snapshot.block_hash.as_ref().into();
+                let block_hash = H256::from_slice(txn.block_snapshot.block_hash.as_ref());
                 let block_number = txn.block_snapshot.block.header.round;
 
                 // Decode transaction output.
@@ -508,7 +509,7 @@ impl EthereumTransaction {
         Ok(LocalizedTransaction {
             signed,
             block_number: self.snapshot.block_snapshot.block.header.round,
-            block_hash: self.snapshot.block_snapshot.block_hash.as_ref().into(),
+            block_hash: H256::from_slice(self.snapshot.block_snapshot.block_hash.as_ref()),
             transaction_index: self.snapshot.index as usize,
             cached_sender: None,
         })
@@ -524,6 +525,7 @@ impl EthereumTransaction {
                 let mut tx = self.transaction()?;
 
                 let transaction_hash = tx.hash();
+                let sender = tx.sender();
                 let transaction_index = tx.transaction_index;
                 let block_hash = tx.block_hash;
                 let block_number = tx.block_number;
@@ -539,7 +541,7 @@ impl EthereumTransaction {
                         Action::Call(_) => None,
                         Action::Create => Some(
                             contract_address(
-                                genesis::SPEC.engine.create_address_scheme(block_number),
+                                CreateContractAddress::FromSenderAndNonce,
                                 &tx.sender(),
                                 &tx.nonce,
                                 &tx.data,
@@ -567,6 +569,8 @@ impl EthereumTransaction {
                         .collect(),
                     log_bloom: result.log_bloom,
                     outcome: TransactionOutcome::StatusCode(result.status_code),
+                    to: None,
+                    from: sender,
                 })
             }
             TxnOutput::Error(_) => Err(anyhow!("receipt not available")),
@@ -599,7 +603,7 @@ impl EthereumBlock {
 
     /// Block hash.
     pub fn hash(&self) -> H256 {
-        self.snapshot.block_hash.as_ref().into()
+        H256::from_slice(self.snapshot.block_hash.as_ref())
     }
 
     /// Ethereum state snapshot at given block.
@@ -607,9 +611,9 @@ impl EthereumBlock {
         Ok(State::from_existing(
             Box::new(BlockSnapshotMKVS(self.snapshot.clone())),
             NullBackend,
-            U256::zero(),       /* account_start_nonce */
+            H256::zero(),       /* account_start_nonce */
+            U256::zero(),
             Default::default(), /* factories */
-            None,               /* confidential_ctx */
         )?)
     }
 
@@ -657,13 +661,13 @@ impl EthereumBlock {
         // Generate header metadata.
         EthRpcRichHeader {
             inner: EthRpcHeader {
-                hash: Some(block_hash.as_ref().into()),
+                hash: Some(H256::from_slice(block_hash.as_ref())),
                 size: None,
-                parent_hash: header.previous_hash.as_ref().into(),
+                parent_hash: H256::from_slice(header.previous_hash.as_ref()),
                 uncles_hash: KECCAK_EMPTY_LIST_RLP.into(), /* empty list */
                 author: Default::default(),
                 miner: Default::default(),
-                state_root: header.state_root.as_ref().into(),
+                state_root: H256::from_slice(header.state_root.as_ref()),
                 transactions_root: Default::default(),
                 receipts_root: Default::default(),
                 number: Some(header.round.into()),
@@ -712,7 +716,7 @@ impl EthereumBlock {
                             EthRpcTransaction::from_localized(LocalizedTransaction {
                                 signed: txn,
                                 block_number: header.round,
-                                block_hash: block_hash.as_ref().into(),
+                                block_hash: H256::from_slice(block_hash.as_ref()),
                                 transaction_index: i,
                                 cached_sender: None,
                             })

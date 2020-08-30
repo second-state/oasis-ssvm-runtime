@@ -7,11 +7,12 @@ extern crate io_context;
 extern crate oasis_core_runtime;
 extern crate oasis_ethwasi_runtime_common;
 extern crate serde_json;
+extern crate spec;
 
-use std::{fs::File, sync::Arc};
+use std::{fs::File, path::Path, sync::Arc};
 
 use clap::{crate_authors, crate_version, App, Arg};
-use ethcore::spec::Spec;
+use spec::{Spec, SpecParams};
 use io_context::Context;
 use oasis_core_runtime::storage::{
     mkvs::{sync::NoopReadSyncer, Tree},
@@ -42,7 +43,9 @@ fn main() {
 
     // Load Ethereum genesis state.
     let eth_genesis = File::open(matches.value_of("eth_genesis").unwrap()).unwrap();
-    let spec = Spec::load(eth_genesis).expect("failed to load Ethereum genesis file");
+    // FIXME tmp?
+    let spec = Spec::load(SpecParams::from_path(Path::new("/tmp/")), eth_genesis)
+        .expect("failed to load Ethereum genesis file");
 
     // Populate MKVS with state required at genesis.
     let untrusted_local = Arc::new(MemoryKeyValue::new());

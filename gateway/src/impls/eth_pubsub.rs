@@ -21,16 +21,13 @@
 use std::sync::{Arc, Weak};
 
 use anyhow::anyhow;
-use ethcore::{
+use common_types::{
     filter::{Filter as EthFilter, TxEntry as EthTxEntry, TxFilter as EthTxFilter},
     ids::BlockId,
 };
 use futures::{prelude::*, stream};
 use jsonrpc_core::Result;
-use jsonrpc_macros::{
-    pubsub::{Sink, Subscriber},
-    Trailing,
-};
+use jsonrpc_pubsub::typed::{Sink, Subscriber};
 use jsonrpc_pubsub::SubscriptionId;
 use lazy_static::lazy_static;
 use oasis_core_runtime::common::logger::get_logger;
@@ -143,7 +140,7 @@ impl ChainNotificationHandler {
 
                     for header in headers {
                         for subscriber in subscribers.values() {
-                            Self::notify(&logger2, subscriber, pubsub::Result::Header(header.clone()));
+                            Self::notify(&logger2, subscriber, pubsub::Result::Header(Box::new(header.clone())));
                         }
                     }
                 }),
@@ -167,7 +164,7 @@ impl ChainNotificationHandler {
                     .logs(filter)
                     .map(move |logs| {
                         for log in logs {
-                            Self::notify(&logger2, &subscriber, pubsub::Result::Log(log.into()));
+                            Self::notify(&logger2, &subscriber, pubsub::Result::Log(Box::new(log.into())));
                         }
                     })
                     .map_err(move |err| {
@@ -212,7 +209,7 @@ impl EthPubSub for EthPubSubClient {
         _meta: Metadata,
         subscriber: Subscriber<pubsub::Result>,
         kind: pubsub::Kind,
-        params: Trailing<pubsub::Params>,
+        params: Option<pubsub::Params>,
     ) {
         ETH_PUBSUB_RPC_CALLS
             .with(&labels! {"call" => "subscribe",})
@@ -235,7 +232,7 @@ impl EthPubSub for EthPubSubClient {
             (pubsub::Kind::Logs, Some(pubsub::Params::Logs(filter))) => {
                 self.logs_subscribers
                     .write()
-                    .push(subscriber, filter.into());
+                    .push(subscriber, filter.try_into().unwrap());
                 return;
             }
             (pubsub::Kind::Logs, _) => errors::invalid_params("logs", "Expected a filter object."),
@@ -251,7 +248,7 @@ impl EthPubSub for EthPubSubClient {
         let _ = subscriber.reject(error);
     }
 
-    fn unsubscribe(&self, id: SubscriptionId) -> Result<bool> {
+    fn unsubscribe(&self, _: Option<Self::Metadata>, id: SubscriptionId) -> Result<bool> {
         ETH_PUBSUB_RPC_CALLS
             .with(&labels! {"call" => "unsubscribe",})
             .inc();

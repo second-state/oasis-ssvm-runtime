@@ -1,9 +1,8 @@
 //! Methods exported to Oasis Core clients.
 use anyhow::Result;
-use ethcore::{
-    rlp,
-    transaction::{SignedTransaction, UnverifiedTransaction},
-    types::receipt::TransactionOutcome,
+use common_types::{
+    transaction::{SignedTransaction,UnverifiedTransaction},
+    receipt::TransactionOutcome,
 };
 use ethereum_types::U256;
 use oasis_core_runtime::{
@@ -16,7 +15,7 @@ use oasis_ethwasi_runtime_common::{
     genesis, BLOCK_GAS_LIMIT, MIN_GAS_PRICE_GWEI, TAG_ETH_LOG_ADDRESS, TAG_ETH_LOG_TOPICS,
     TAG_ETH_TX_HASH,
 };
-
+use executive_state::ExecutiveState;
 use crate::block::BlockContext;
 
 /// Check transactions.
@@ -81,7 +80,6 @@ pub mod execute {
                 genesis::SPEC.engine.machine(),
                 &txn,
                 false, /* tracing */
-                true,  /* should_return_value */
             )
             .map_err(|err| TransactionError::ExecutionFailure {
                 message: format!("{}", err),

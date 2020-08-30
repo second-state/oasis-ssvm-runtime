@@ -1,7 +1,7 @@
 use std::fmt;
 
 use anyhow::Error;
-use ethcore::ids::BlockId;
+use common_types::ids::BlockId;
 use ethereum_types::U256;
 use jsonrpc_core::{self, ErrorCode, Value};
 use parity_rpc::v1::{helpers::errors::codes, types::BlockNumber};
@@ -18,6 +18,7 @@ pub fn block_number_to_id(number: BlockNumber) -> BlockId {
         BlockNumber::Earliest => BlockId::Earliest,
         BlockNumber::Latest => BlockId::Latest,
         BlockNumber::Pending => BlockId::Latest,
+        BlockNumber::Hash { hash, .. } => BlockId::Hash(hash)
     }
 }
 

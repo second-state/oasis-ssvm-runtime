@@ -161,7 +161,7 @@ pub fn new_ws<D: rpc_apis::Dependencies>(
 
     match start_result {
         Ok(server) => Ok(Some(server)),
-        Err(rpc::ws::Error(rpc::ws::ErrorKind::Io(ref err), _))
+        Err(rpc::ws::Error::Io(err))
             if err.kind() == io::ErrorKind::AddrInUse => Err(
             format!("WebSockets address {} is already in use, make sure that another instance of an Ethereum client is not running or change the address using the --ws-port and --ws-interface options.", url)
         ),

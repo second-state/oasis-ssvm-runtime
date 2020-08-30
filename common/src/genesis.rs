@@ -1,9 +1,11 @@
 //! Genesis state.
 use std::io::Cursor;
+use std::path::Path;
 
-use ethcore::spec::Spec;
 use ethereum_types::U256;
 use lazy_static::lazy_static;
+use spec::Spec;
+use spec::SpecParams;
 
 use crate::BLOCK_GAS_LIMIT;
 
@@ -25,6 +27,6 @@ lazy_static! {
         #[cfg(not(feature = "benchmarking"))]
         let spec_json = include_str!("../../resources/genesis/genesis_testing.json");
 
-        Spec::load(Cursor::new(spec_json)).expect("must have a valid genesis spec")
+        Spec::load(SpecParams::from_path(Path::new("/tmp/")), Cursor::new(spec_json)).expect("must have a valid genesis spec")
     };
 }

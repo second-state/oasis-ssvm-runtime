@@ -19,8 +19,8 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use anyhow::Error;
-use ethcore::{filter::Filter as EthcoreFilter, ids::BlockId};
-use ethereum_types::{Address, H256, H64, U256};
+use common_types::{filter::Filter as EthcoreFilter, ids::BlockId};
+use ethereum_types::{Address, U64, H160, H256, H64, U256};
 use jsonrpc_core::{
     futures::{future, Future},
     BoxFuture, Result,
@@ -34,8 +34,7 @@ use parity_rpc::v1::{
     traits::Eth,
     types::{
         BlockNumber, Bytes, CallRequest, Filter, Index, Log as RpcLog, Receipt as RpcReceipt,
-        RichBlock, Transaction as RpcTransaction, Work, H160 as RpcH160, H256 as RpcH256,
-        H64 as RpcH64, U256 as RpcU256, U64 as RpcU64,
+        RichBlock, Transaction as RpcTransaction, Work, EthAccount
     },
 };
 use prometheus::{
@@ -136,7 +135,7 @@ impl Eth for EthClient {
         Ok(false)
     }
 
-    fn author(&self, _meta: Metadata) -> Result<RpcH160> {
+    fn author(&self) -> Result<H160> {
         ETH_RPC_CALLS.with(&labels! {"call" => "coinbase",}).inc();
         Ok(Default::default())
     }
@@ -146,27 +145,27 @@ impl Eth for EthClient {
         Ok(true)
     }
 
-    fn hashrate(&self) -> Result<RpcU256> {
+    fn hashrate(&self) -> Result<U256> {
         ETH_RPC_CALLS.with(&labels! {"call" => "hashrate",}).inc();
-        Ok(RpcU256::from(0))
+        Ok(U256::from(0))
     }
 
-    fn gas_price(&self) -> Result<RpcU256> {
+    fn gas_price(&self) -> BoxFuture<U256> {
         ETH_RPC_CALLS.with(&labels! {"call" => "gasPrice",}).inc();
-        Ok(self.translator.gas_price().into())
+        Box::new(future::done(Ok(self.translator.gas_price())))
     }
 
-    fn accounts(&self, _meta: Metadata) -> Result<Vec<RpcH160>> {
+    fn accounts(&self) -> Result<Vec<H160>> {
         ETH_RPC_CALLS.with(&labels! {"call" => "accounts",}).inc();
         Ok(vec![])
     }
 
-    fn chain_id(&self) -> Result<Option<RpcU64>> {
+    fn chain_id(&self) -> Result<Option<U64>> {
         ETH_RPC_CALLS.with(&labels! {"call" => "chainId",}).inc();
         Ok(Some((1 as u64).into()))
     }
 
-    fn block_number(&self) -> BoxFuture<RpcU256> {
+    fn block_number(&self) -> BoxFuture<U256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "blockNumber",})
             .inc();
@@ -174,12 +173,12 @@ impl Eth for EthClient {
         Box::new(
             self.translator
                 .get_latest_block()
-                .map(|blk| RpcU256::from(blk.number()))
+                .map(|blk| U256::from(blk.number()))
                 .map_err(jsonrpc_error),
         )
     }
 
-    fn balance(&self, address: RpcH160, num: Trailing<BlockNumber>) -> BoxFuture<RpcU256> {
+    fn balance(&self, address: H160, num: Option<BlockNumber>) -> BoxFuture<U256> {
         ETH_RPC_CALLS.with(&labels! {"call" => "getBalance",}).inc();
 
         let address = address.into();
@@ -195,18 +194,22 @@ impl Eth for EthClient {
         )
     }
 
+    fn proof(&self, _: H160, _: Vec<H256>, _: Option<BlockNumber>) -> BoxFuture<EthAccount>{
+        unimplemented!();
+    }
+
     fn storage_at(
         &self,
-        address: RpcH160,
-        pos: RpcU256,
-        num: Trailing<BlockNumber>,
-    ) -> BoxFuture<RpcH256> {
+        address: H160,
+        pos: U256,
+        num: Option<BlockNumber>,
+    ) -> BoxFuture<H256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getStorageAt",})
             .inc();
 
         let address = address.into();
-        let pos: U256 = RpcU256::into(pos);
+        let pos: U256 = U256::into(pos);
         let num = num.unwrap_or_default();
 
         info!(
@@ -217,7 +220,9 @@ impl Eth for EthClient {
                 "num" => ?num
         );
 
-        let pos = pos.into();
+        let mut a = [0u8;32];
+        pos.to_little_endian(&mut a);
+        let pos = H256::from_slice(&a);
 
         Box::new(
             self.translator
@@ -229,14 +234,14 @@ impl Eth for EthClient {
 
     fn transaction_count(
         &self,
-        address: RpcH160,
-        num: Trailing<BlockNumber>,
-    ) -> BoxFuture<RpcU256> {
+        address: H160,
+        num: Option<BlockNumber>,
+    ) -> BoxFuture<U256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getTransactionCount",})
             .inc();
 
-        let address: Address = RpcH160::into(address);
+        let address: Address = H160::into(address);
         let num = num.unwrap_or_default();
 
         info!(
@@ -254,7 +259,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn block_transaction_count_by_hash(&self, hash: RpcH256) -> BoxFuture<Option<RpcU256>> {
+    fn block_transaction_count_by_hash(&self, hash: H256) -> BoxFuture<Option<U256>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getBlockTransactionCountByHash",})
             .inc();
@@ -275,7 +280,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn block_transaction_count_by_number(&self, num: BlockNumber) -> BoxFuture<Option<RpcU256>> {
+    fn block_transaction_count_by_number(&self, num: BlockNumber) -> BoxFuture<Option<U256>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getBlockTransactionCountByNumber",})
             .inc();
@@ -301,7 +306,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn block_uncles_count_by_hash(&self, _hash: RpcH256) -> BoxFuture<Option<RpcU256>> {
+    fn block_uncles_count_by_hash(&self, _hash: H256) -> BoxFuture<Option<U256>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getUncleCountByBlockHash",})
             .inc();
@@ -310,7 +315,7 @@ impl Eth for EthClient {
         Box::new(future::ok(None))
     }
 
-    fn block_uncles_count_by_number(&self, _num: BlockNumber) -> BoxFuture<Option<RpcU256>> {
+    fn block_uncles_count_by_number(&self, _num: BlockNumber) -> BoxFuture<Option<U256>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getUncleCountByBlockNumber",})
             .inc();
@@ -319,10 +324,10 @@ impl Eth for EthClient {
         Box::new(future::ok(None))
     }
 
-    fn code_at(&self, address: RpcH160, num: Trailing<BlockNumber>) -> BoxFuture<Bytes> {
+    fn code_at(&self, address: H160, num: Option<BlockNumber>) -> BoxFuture<Bytes> {
         ETH_RPC_CALLS.with(&labels! {"call" => "getCode",}).inc();
 
-        let address: Address = RpcH160::into(address);
+        let address: Address = H160::into(address);
         let num = num.unwrap_or_default();
 
         info!(self.logger, "eth_getCode"; "address" => ?address, "num" => ?num);
@@ -340,7 +345,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn block_by_hash(&self, hash: RpcH256, include_txs: bool) -> BoxFuture<Option<RichBlock>> {
+    fn block_by_hash(&self, hash: H256, include_txs: bool) -> BoxFuture<Option<RichBlock>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getBlockByHash",})
             .inc();
@@ -392,7 +397,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn transaction_by_hash(&self, hash: RpcH256) -> BoxFuture<Option<RpcTransaction>> {
+    fn transaction_by_hash(&self, hash: H256) -> BoxFuture<Option<RpcTransaction>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getTransactionByHash",})
             .inc();
@@ -413,7 +418,7 @@ impl Eth for EthClient {
 
     fn transaction_by_block_hash_and_index(
         &self,
-        hash: RpcH256,
+        hash: H256,
         index: Index,
     ) -> BoxFuture<Option<RpcTransaction>> {
         ETH_RPC_CALLS
@@ -470,7 +475,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn transaction_receipt(&self, hash: RpcH256) -> BoxFuture<Option<RpcReceipt>> {
+    fn transaction_receipt(&self, hash: H256) -> BoxFuture<Option<RpcReceipt>> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "getTransactionReceipt",})
             .inc();
@@ -488,7 +493,7 @@ impl Eth for EthClient {
 
     fn uncle_by_block_hash_and_index(
         &self,
-        _hash: RpcH256,
+        _hash: H256,
         _index: Index,
     ) -> BoxFuture<Option<RichBlock>> {
         ETH_RPC_CALLS
@@ -525,7 +530,7 @@ impl Eth for EthClient {
         ETH_RPC_CALLS.with(&labels! {"call" => "getLogs",}).inc();
         info!(self.logger, "eth_getLogs"; "filter" => ?filter);
 
-        let filter: EthcoreFilter = filter.into();
+        let filter: EthcoreFilter = filter.try_into().unwrap();
 
         Box::new(
             self.translator
@@ -536,24 +541,24 @@ impl Eth for EthClient {
         )
     }
 
-    fn work(&self, _no_new_work_timeout: Trailing<u64>) -> Result<Work> {
+    fn work(&self, _no_new_work_timeout: Option<u64>) -> Result<Work> {
         ETH_RPC_CALLS.with(&labels! {"call" => "getWork",}).inc();
         Err(errors::unimplemented(None))
     }
 
-    fn submit_work(&self, _nonce: RpcH64, _pow_hash: RpcH256, _mix_hash: RpcH256) -> Result<bool> {
+    fn submit_work(&self, _nonce: H64, _pow_hash: H256, _mix_hash: H256) -> Result<bool> {
         ETH_RPC_CALLS.with(&labels! {"call" => "submitWork",}).inc();
         Err(errors::unimplemented(None))
     }
 
-    fn submit_hashrate(&self, _rate: RpcU256, _id: RpcH256) -> Result<bool> {
+    fn submit_hashrate(&self, _rate: U256, _id: H256) -> Result<bool> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "submitHashrate",})
             .inc();
         Err(errors::unimplemented(None))
     }
 
-    fn send_raw_transaction(&self, raw: Bytes) -> BoxFuture<RpcH256> {
+    fn send_raw_transaction(&self, raw: Bytes) -> BoxFuture<H256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "sendRawTransaction",})
             .inc();
@@ -579,7 +584,7 @@ impl Eth for EthClient {
         )
     }
 
-    fn submit_transaction(&self, raw: Bytes) -> BoxFuture<RpcH256> {
+    fn submit_transaction(&self, raw: Bytes) -> BoxFuture<H256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "submitTransaction",})
             .inc();
@@ -590,9 +595,8 @@ impl Eth for EthClient {
 
     fn call(
         &self,
-        meta: Self::Metadata,
         request: CallRequest,
-        num: Trailing<BlockNumber>,
+        num: Option<BlockNumber>,
     ) -> BoxFuture<Bytes> {
         ETH_RPC_CALLS.with(&labels! {"call" => "call",}).inc();
         let timer = ETH_RPC_CALL_TIME
@@ -603,7 +607,7 @@ impl Eth for EthClient {
 
         info!(self.logger, "eth_call"; "request" => ?request, "num" => ?num);
 
-        let signed = try_bf!(fake_sign::sign_call(request.into(), meta.is_dapp()));
+        let signed = try_bf!(fake_sign::sign_call(request.into()));
 
         Box::new(
             self.translator
@@ -623,10 +627,9 @@ impl Eth for EthClient {
 
     fn estimate_gas(
         &self,
-        meta: Self::Metadata,
         request: CallRequest,
-        num: Trailing<BlockNumber>,
-    ) -> BoxFuture<RpcU256> {
+        num: Option<BlockNumber>,
+    ) -> BoxFuture<U256> {
         ETH_RPC_CALLS
             .with(&labels! {"call" => "estimateGas",})
             .inc();
@@ -638,7 +641,7 @@ impl Eth for EthClient {
 
         info!(self.logger, "eth_estimateGas"; "request" => ?request, "num" => ?num);
 
-        let signed = try_bf!(fake_sign::sign_call(request.into(), meta.is_dapp()));
+        let signed = try_bf!(fake_sign::sign_call(request.into()));
 
         Box::new(
             self.translator

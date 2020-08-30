@@ -28,19 +28,24 @@ extern crate jsonrpc_core;
 #[macro_use]
 extern crate jsonrpc_macros;
 extern crate anyhow;
+extern crate account_state;
 extern crate ethcore;
+extern crate common_types;
+extern crate machine;
+extern crate vm;
 extern crate ethereum_types;
 extern crate grpcio;
 #[cfg(test)]
 extern crate hex;
 extern crate io_context;
+extern crate jsonrpc_derive;
 extern crate jsonrpc_http_server;
 extern crate jsonrpc_pubsub;
 extern crate jsonrpc_ws_server;
 extern crate keccak_hash as hash;
-extern crate parity_reactor;
 extern crate parity_rpc;
 extern crate prometheus;
+extern crate rlp;
 extern crate serde_bytes;
 extern crate slog;
 extern crate tokio;

@@ -1,27 +1,28 @@
 //! Oasis RPC interface.
 use ethereum_types::Address;
+use jsonrpc_derive::rpc;
 use jsonrpc_core::BoxFuture;
 use jsonrpc_macros::Trailing;
 
-use parity_rpc::v1::types::{BlockNumber, Bytes, H160, H256, U64};
+use ethereum_types::{H160, H256, U64};
+use parity_rpc::v1::types::{BlockNumber, Bytes};
 
-build_rpc_trait! {
-    pub trait Oasis {
-        type Metadata;
-        /// Returns the public key of a contract, given its address.
-        #[rpc(name = "oasis_getPublicKey")]
-        fn public_key(&self, Address) -> BoxFuture<Option<RpcPublicKeyPayload>>;
+#[rpc(server)]
+pub trait Oasis {
+    type Metadata;
+    /// Returns the public key of a contract, given its address.
+    #[rpc(name = "oasis_getPublicKey")]
+    fn public_key(&self, contract: Address) -> BoxFuture<Option<RpcPublicKeyPayload>>;
 
-        /// Gets the expiration timestamp for a contract.
-        /// The value is a Unix timestamp (seconds since the epoch).
-        #[rpc(name = "oasis_getExpiry")]
-        fn get_expiry(&self, H160, Trailing<BlockNumber>) -> BoxFuture<u64>;
+    // /// Gets the expiration timestamp for a contract.
+    // /// The value is a Unix timestamp (seconds since the epoch).
+    // #[rpc(name = "oasis_getExpiry")]
+    // fn get_expiry(&self, H160, Trailing<BlockNumber>) -> BoxFuture<u64>;
 
-        /// Sends a signed transaction, and returns the transaction hash,
-        /// status code and return value.
-        #[rpc(name = "oasis_invoke")]
-        fn invoke(&self, Bytes) -> BoxFuture<RpcExecutionPayload>;
-    }
+    /// Sends a signed transaction, and returns the transaction hash,
+    /// status code and return value.
+    #[rpc(name = "oasis_invoke")]
+    fn invoke(&self, raw: Bytes) -> BoxFuture<RpcExecutionPayload>;
 }
 
 #[derive(Debug, Serialize, Deserialize)]

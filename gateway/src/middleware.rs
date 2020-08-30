@@ -1,11 +1,12 @@
 //! RPC Middleware
 
+use ethereum_types::H256;
 use informant::RpcStats;
 use jsonrpc_core as rpc;
 use jsonrpc_core::futures::{future::Either, Future};
 use jsonrpc_ws_server as ws;
 use lazy_static::lazy_static;
-use parity_rpc::{informant::ActivityNotifier, v1::types::H256, Metadata, Origin};
+use parity_rpc::{informant::ActivityNotifier, Metadata, Origin};
 use prometheus::{
     register_histogram, register_int_counter, register_int_gauge, Histogram, IntCounter, IntGauge,
 };
@@ -118,6 +119,7 @@ impl<T: ActivityNotifier> Middleware<T> {
 
 impl<M: rpc::Metadata, T: ActivityNotifier> rpc::Middleware<M> for Middleware<T> {
     type Future = rpc::FutureResponse;
+    type CallFuture = rpc::middleware::NoopCallFuture;
 
     fn on_request<F, X>(
         &self,
@@ -167,6 +169,7 @@ impl WsDispatcher {
 
 impl rpc::Middleware<Metadata> for WsDispatcher {
     type Future = rpc::FutureResponse;
+    type CallFuture = rpc::middleware::NoopCallFuture;
 
     fn on_request<F, X>(
         &self,
@@ -205,12 +208,12 @@ impl WsStats {
 
 impl ws::SessionStats for WsStats {
     fn open_session(&self, id: ws::SessionId) {
-        self.stats.open_session(H256::from(id));
+        self.stats.open_session(H256::from_low_u64_le(id));
         WS_SESSIONS.set(self.stats.sessions() as i64);
     }
 
     fn close_session(&self, id: ws::SessionId) {
-        self.stats.close_session(&H256::from(id));
+        self.stats.close_session(&H256::from_low_u64_le(id));
         WS_SESSIONS.set(self.stats.sessions() as i64);
     }
 }

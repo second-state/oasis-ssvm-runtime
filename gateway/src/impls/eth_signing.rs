@@ -1,13 +1,11 @@
+use ethereum_types::{H160 as H160, H256 as H256, H520 as H520};
 use jsonrpc_core::{futures::future, BoxFuture};
 use lazy_static::lazy_static;
 use parity_rpc::v1::{
     helpers::errors,
     metadata::Metadata,
     traits::EthSigning,
-    types::{
-        Bytes, RichRawTransaction, TransactionRequest, H160 as RpcH160, H256 as RpcH256,
-        H520 as RpcH520,
-    },
+    types::{Bytes, RichRawTransaction, TransactionRequest},
 };
 use prometheus::{labels, register_int_counter_vec, IntCounterVec};
 
@@ -32,7 +30,7 @@ impl EthSigningClient {
 impl EthSigning for EthSigningClient {
     type Metadata = Metadata;
 
-    fn sign(&self, _: Metadata, _: RpcH160, _: Bytes) -> BoxFuture<RpcH520> {
+    fn sign(&self, _: Metadata, _: H160, _: Bytes) -> BoxFuture<H520> {
         ETH_SIGNING_RPC_CALLS
             .with(&labels! {"call" => "sign",})
             .inc();
@@ -40,7 +38,7 @@ impl EthSigning for EthSigningClient {
             Make sure that the wallet is setup correctly in the client in case transaction signing is expected to happen transparently".to_string(), None)))
     }
 
-    fn send_transaction(&self, _: Metadata, _: TransactionRequest) -> BoxFuture<RpcH256> {
+    fn send_transaction(&self, _: Metadata, _: TransactionRequest) -> BoxFuture<H256> {
         ETH_SIGNING_RPC_CALLS
             .with(&labels! {"call" => "sendTransaction",})
             .inc();

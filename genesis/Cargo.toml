@@ -9,12 +9,20 @@ oasis-ethwasi-runtime-common = { path = "../common" }
 oasis-core-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.9" }
 oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.9" }
 
+
+# Openethereum.
+ethcore = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+spec = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+account-state = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+
+# Parity.
+ethereum-types = { version = "0.9.2", default-features = false, features = ["std", "serialize"] }
+rlp = "0.4.5"
+
+# Others.
+hex = "0.4.2"
 clap = "2.29.1"
-ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
 filebuffer = "0.4.0"
-hex = "0.3.1"
-rlp = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-ethcore = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"

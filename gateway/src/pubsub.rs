@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use ethcore::filter::TxEntry;
+use common_types::filter::TxEntry;
 use futures::prelude::*;
 use oasis_core_runtime::common::logger::get_logger;
 use slog::{error, Logger};

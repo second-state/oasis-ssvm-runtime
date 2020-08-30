@@ -23,13 +23,19 @@ oasis-ethwasi-runtime-keymanager = { path = "./keymanager-runtime" }
 oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.9" }
 oasis-core-keymanager-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.9" }
 
+# Openethereum.
+common-types = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+ethcore = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+ethkey = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+vm = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+account-state = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+executive-state = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+
 # Parity.
-common-types = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-ethcore = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-ethkey = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-hashdb = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-keccak-hash = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
+hash-db = "0.15.2"
+keccak-hash = "0.5.1"
+ethereum-types = { version = "0.9.2", default-features = false, features = ["std", "serialize"] }
+rlp = "0.4.5"
 
 # Others.
 anyhow = "1.0"

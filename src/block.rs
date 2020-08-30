@@ -1,7 +1,7 @@
 //! Ethereum block creation.
 use std::{collections::HashSet, sync::Arc};
-
-use ethcore::{self, state::State, vm::EnvInfo};
+use account_state::state::State;
+use vm::EnvInfo;
 use ethereum_types::{H256, U256};
 use io_context::Context as IoContext;
 use oasis_core_keymanager_client::KeyManagerClient;
@@ -9,7 +9,7 @@ use oasis_core_runtime::{
     common::logger::get_logger, runtime_context, transaction::Context as TxnContext,
 };
 use oasis_ethwasi_runtime_common::{
-    confidential::ConfidentialCtx, genesis, parity::NullBackend, storage::ThreadLocalMKVS,
+    genesis, parity::NullBackend, storage::ThreadLocalMKVS,
 };
 use slog::{info, Logger};
 
@@ -43,13 +43,9 @@ impl OasisBatchHandler {
         let state = State::from_existing(
             Box::new(ThreadLocalMKVS::new(IoContext::create_child(&ctx.io_ctx))),
             NullBackend,
-            U256::zero(),       /* account_start_nonce */
+            H256::zero(),       /* account_start_nonce */
+            U256::zero(),
             Default::default(), /* factories */
-            Some(Box::new(ConfidentialCtx::new(
-                ctx.header.previous_hash.as_ref().into(),
-                ctx.io_ctx.clone(),
-                self.key_manager.clone(),
-            ))),
         )
         .expect("state initialization must succeed");
 
@@ -61,7 +57,7 @@ impl OasisBatchHandler {
             difficulty: Default::default(),
             gas_limit: *genesis::GAS_LIMIT,
             // TODO: Get 256 last_hashes.
-            last_hashes: Arc::new(vec![ctx.header.previous_hash.as_ref().into()]),
+            last_hashes: Arc::new(vec![H256::from_slice(ctx.header.previous_hash.as_ref())]),
             gas_used: Default::default(),
         };
 

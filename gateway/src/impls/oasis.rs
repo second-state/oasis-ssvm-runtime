@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use ethereum_types::Address;
+use ethereum_types::{Address, H160};
 use futures::prelude::*;
 use hash::keccak;
 use io_context::Context;
@@ -12,7 +12,7 @@ use oasis_core_runtime::common::logger::get_logger;
 use parity_rpc::v1::{
     helpers::errors,
     metadata::Metadata,
-    types::{BlockNumber, Bytes, H160 as RpcH160},
+    types::{BlockNumber, Bytes},
 };
 use prometheus::{
     labels, register_histogram_vec, register_int_counter_vec, HistogramVec, IntCounterVec,
@@ -73,7 +73,7 @@ impl Oasis for OasisClient {
 
         info!(self.logger, "oasis_getPublicKey"; "contract" => ?contract);
 
-        let contract_id = KeyPairId::from(&keccak(contract.to_vec())[..]);
+        let contract_id = KeyPairId::from(&keccak(contract.as_bytes())[..]);
 
         // TODO: Support proper I/O contexts (requires RPC interface changes).
         Box::new(
@@ -92,27 +92,27 @@ impl Oasis for OasisClient {
         )
     }
 
-    fn get_expiry(&self, address: RpcH160, num: Trailing<BlockNumber>) -> BoxFuture<u64> {
-        OASIS_RPC_CALLS
-            .with(&labels! {"call" => "getExpiry",})
-            .inc();
-        let address: Address = RpcH160::into(address);
-        let num = num.unwrap_or_default();
+    // fn get_expiry(&self, address: H160, num: Trailing<BlockNumber>) -> BoxFuture<u64> {
+    //     OASIS_RPC_CALLS
+    //         .with(&labels! {"call" => "getExpiry",})
+    //         .inc();
+    //     let address: Address = H160::into(address);
+    //     let num = num.unwrap_or_default();
 
-        info!(
-            self.logger,
-            "oasis_getExpiry";
-                "address" => ?address,
-                "num" => ?num
-        );
+    //     info!(
+    //         self.logger,
+    //         "oasis_getExpiry";
+    //             "address" => ?address,
+    //             "num" => ?num
+    //     );
 
-        Box::new(
-            self.translator
-                .get_block_unwrap(block_number_to_id(num))
-                .and_then(move |blk| Ok(blk.state()?.storage_expiry(&address)?))
-                .map_err(jsonrpc_error),
-        )
-    }
+    //     Box::new(
+    //         self.translator
+    //             .get_block_unwrap(block_number_to_id(num))
+    //             .and_then(move |blk| Ok(blk.state()?.storage_expiry(&address)?))
+    //             .map_err(jsonrpc_error),
+    //     )
+    // }
 
     fn invoke(&self, raw: Bytes) -> BoxFuture<RpcExecutionPayload> {
         OASIS_RPC_CALLS.with(&labels! {"call" => "invoke",}).inc();

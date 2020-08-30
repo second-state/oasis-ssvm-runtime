@@ -12,7 +12,6 @@
     "networkID" : "0xa515",
     "maxCodeSize": 4294967296,
     "maxCodeSizeTransition": "0x0",
-    "eip86Transition": "0xffffffffffffffff",
     "eip98Transition": "0xffffffffffffffff",
     "eip140Transition": "0x0",
     "eip145Transition": "0x0",

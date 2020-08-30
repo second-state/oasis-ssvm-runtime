@@ -1,11 +1,13 @@
 //! A utility for importing genesis state for Ethereum playback benchmarks.
 #![deny(warnings)]
 
+extern crate account_state;
 extern crate clap;
 extern crate ethcore;
 extern crate ethereum_types;
 extern crate filebuffer;
 extern crate hex;
+extern crate spec;
 #[macro_use]
 extern crate serde_derive;
 extern crate grpcio;
@@ -20,12 +22,14 @@ use std::{
     collections::{BTreeMap, HashMap},
     fs::File,
     io::Cursor,
+    path::Path,
     str::FromStr,
     sync::Arc,
 };
 
+use account_state::State;
 use clap::{crate_authors, crate_version, value_t_or_exit, App, Arg};
-use ethcore::{spec::Spec, state::State};
+use spec::{Spec, SpecParams};
 use ethereum_types::{Address, H256, U256};
 use grpcio::{CallOption, EnvBuilder};
 use io_context::Context;
@@ -214,7 +218,12 @@ fn main() {
 
     // Load Ethereum genesis state.
     let genesis_json = include_str!("../../resources/genesis/genesis_testing.json");
-    let spec = Spec::load(Cursor::new(genesis_json)).expect("failed to load Ethereum genesis file");
+    // FIXME tmp?
+    let spec = Spec::load(
+        SpecParams::from_path(Path::new("/tmp/")),
+        Cursor::new(genesis_json),
+    )
+    .expect("failed to load Ethereum genesis file");
 
     StorageContext::enter(&mut mkvs, untrusted_local, || {
         // Initialize state with genesis block.
@@ -229,9 +238,10 @@ fn main() {
         let mut state = State::from_existing(
             Box::new(ThreadLocalMKVS::new(Context::background())),
             NullBackend,
+            // FIXME
+            H256::zero(),       /* root */
             U256::zero(),       /* account_start_nonce */
             Default::default(), /* factories */
-            None,
         )
         .expect("state initialization must succeed");
 
@@ -290,7 +300,7 @@ fn main() {
 
             // Inject account.
             // (storage expiry initialized to 0)
-            state.new_contract(&address, balance, nonce, 0);
+            let _result = state.new_contract(&address, balance, nonce, U256::zero());
             check_commit(&mut state, &mut ops, n_accounts);
 
             if let Some(code) = account.code {

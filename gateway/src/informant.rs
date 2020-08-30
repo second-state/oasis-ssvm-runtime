@@ -20,7 +20,7 @@
 
 use std::{collections::HashMap, fmt, time};
 
-use parity_rpc::v1::types::H256;
+use ethereum_types::H256;
 use parking_lot::RwLock;
 
 const RATE_SECONDS: usize = 10;
