@@ -9,11 +9,11 @@ oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag 
 oasis-core-keymanager-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.9" }
 
 # Openethereum.
-ethcore = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-account-state = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-spec = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-vm = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-keccak-hasher = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+ethcore = { path = "../../openethereum/ethcore" }
+account-state = { path = "../../openethereum/ethcore/account-state" }
+spec = { path = "../../openethereum/ethcore/spec" }
+vm = { path = "../../openethereum/ethcore/vm" }
+keccak-hasher = { path = "../../openethereum/util/keccak-hasher" }
 
 # Parity.
 keccak-hash = "0.5.1"

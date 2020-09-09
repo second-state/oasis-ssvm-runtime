@@ -25,12 +25,12 @@ lazy_static = "1.3.0"
 wasmi = "0.4"
 
 # Openethereum
-ethcore = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-common-types = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-machine = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-vm = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-account-state = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
-parity-rpc = { git = "https://github.com/second-state/openethereum.git", branch = "oasis"}
+ethcore = { path = "../../openethereum/ethcore" }
+common-types = { path = "../../openethereum/ethcore/types" }
+machine = { path = "../../openethereum/ethcore/machine" }
+vm = { path = "../../openethereum/ethcore/vm" }
+account-state = { path = "../../openethereum/ethcore/account-state" }
+parity-rpc = { path = "../../openethereum/rpc" }
 
 # Parity
 hash-db = "0.15.2"
