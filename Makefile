@@ -89,9 +89,9 @@ build-runtimes:
 	@CARGO_TARGET_ROOT=$(shell pwd)/target && for e in $(RUNTIMES); do \
 		$(ECHO) "$(MAGENTA)*** Building runtime: $$e...$(OFF)"; \
 		(cd $$e && \
-			CARGO_TARGET_DIR=$(RUNTIME_SGX_CARGO_TARGET_DIR) cargo build $(EXTRA_BUILD_ARGS) $(CARGO_BUILD_ARGS) --target x86_64-fortanix-unknown-sgx && \
-			CARGO_TARGET_DIR=$(RUNTIME_CARGO_TARGET_DIR) cargo build $(EXTRA_BUILD_ARGS) $(CARGO_BUILD_ARGS) && \
-			CARGO_TARGET_DIR=$(RUNTIME_SGX_CARGO_TARGET_DIR) cargo elf2sgxs $(EXTRA_BUILD_ARGS) \
+			# CARGO_TARGET_DIR=$(RUNTIME_SGX_CARGO_TARGET_DIR) cargo build $(EXTRA_BUILD_ARGS) $(CARGO_BUILD_ARGS) --target x86_64-fortanix-unknown-sgx && \
+			CARGO_TARGET_DIR=$(RUNTIME_CARGO_TARGET_DIR) cargo build $(EXTRA_BUILD_ARGS) $(CARGO_BUILD_ARGS) \
+			# CARGO_TARGET_DIR=$(RUNTIME_SGX_CARGO_TARGET_DIR) cargo elf2sgxs $(EXTRA_BUILD_ARGS) \
 		) || exit 1; \
 	done
 
