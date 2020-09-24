@@ -163,7 +163,7 @@ impl Eth for EthClient {
 
     fn chain_id(&self) -> Result<Option<RpcU64>> {
         ETH_RPC_CALLS.with(&labels! {"call" => "chainId",}).inc();
-        Ok(Some((69 as u64).into()))
+        Ok(Some(self.translator.get_chain_id().into()))
     }
 
     fn block_number(&self) -> BoxFuture<RpcU256> {
