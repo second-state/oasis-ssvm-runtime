@@ -103,6 +103,11 @@ impl Translator {
         })
     }
 
+    /// Retrieve the chain id.
+    pub fn get_chain_id(&self) -> u64 {
+        genesis::SPEC.engine.machine().params().chain_id
+    }
+
     /// Retrieve the latest Ethereum block.
     pub fn get_latest_block(&self) -> impl Future<Item = EthereumBlock, Error = Error> {
         let client = self.client.clone();
