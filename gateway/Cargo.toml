@@ -5,7 +5,7 @@ license = "GPL-3.0"
 authors = ["Oasis Labs Inc. <info@oasislabs.com>", "Parity Technologies <admin@parity.io>"]
 
 [dependencies]
-ethcore = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+ethcore = { path="../../oasis-parity/ethcore" }
 ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
 fdlimit = "0.1"
 futures = "0.1"
@@ -14,15 +14,15 @@ jsonrpc-http-server = { git = "https://github.com/oasislabs/jsonrpc.git", branch
 jsonrpc-macros = { git = "https://github.com/oasislabs/jsonrpc.git", branch = "hyper-v0.12" }
 jsonrpc-pubsub = { git = "https://github.com/oasislabs/jsonrpc.git", branch = "hyper-v0.12" }
 jsonrpc-ws-server = { git = "https://github.com/oasislabs/jsonrpc.git", branch = "hyper-v0.12" }
-keccak-hash = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+keccak-hash = { path = "../../oasis-parity/util/hash" }
 lazy_static = "1.3.0"
 log = "0.4"
-mem = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-parity-reactor = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-parity-rpc = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+mem = { path = "../../oasis-parity/util/mem" }
+parity-reactor = { path = "../../oasis-parity/util/reactor" }
+parity-rpc = { path = "../../oasis-parity/rpc" }
 parking_lot = "0.5"
 prometheus = { version = "0.8", features = ["push"] }
-rlp = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
+rlp = { path = "../../oasis-parity/util/rlp" }
 serde = "1.0"
 serde_bytes = "0.11"
 serde_derive = "1.0"
