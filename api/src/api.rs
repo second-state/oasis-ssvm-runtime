@@ -43,6 +43,8 @@ pub enum TransactionError {
     GasPrice,
     #[error("requested gas greater than block gas limit")]
     TooMuchGas,
+    #[error("invalid chain id")]
+    InvalidChainId,
 }
 
 /// Name of the method which executes a transaction.
