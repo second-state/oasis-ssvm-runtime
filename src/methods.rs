@@ -40,6 +40,12 @@ pub mod check {
             return Err(TransactionError::GasPrice.into());
         }
 
+        // Verify chain id
+        match signed.verify_basic(true, Some(genesis::SPEC.engine.machine().params().chain_id), false) {
+            Ok(_) => {},
+            Err(_) => return Err(TransactionError::InvalidChainId.into()),
+        }
+
         Ok(signed)
     }
 }
