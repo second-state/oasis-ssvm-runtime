@@ -44,7 +44,7 @@ impl Net for NetClient {
     fn version(&self) -> Result<String> {
         NET_RPC_CALLS.with(&labels! {"call" => "version",}).inc();
         // 0A515 1AB5
-        Ok(format!("{}", 0xa515))
+        Ok(format!("{}", 69))
     }
 
     fn peer_count(&self) -> Result<String> {

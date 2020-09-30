@@ -9,7 +9,7 @@
     "accountStartNonce": "0x00",
     "maximumExtraDataSize": "0x20",
     "minGasLimit": "0x1388",
-    "networkID" : "0xa515",
+    "networkID" : "0x45",
     "maxCodeSize": 4294967296,
     "maxCodeSizeTransition": "0x0",
     "eip86Transition": "0xffffffffffffffff",
@@ -50,7 +50,7 @@
       "balance": "100000000000000000000000000000"
     },
     "1cca28600d7491365520b31b466f88647b9839ec": {
-      "balance": "100000000000000000000"
+      "balance": "21000000000000000000000000"
     }
   }
 }
