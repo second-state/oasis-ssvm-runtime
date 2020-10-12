@@ -11,6 +11,7 @@ extern crate oasis_core_keymanager_client;
 extern crate oasis_core_runtime;
 extern crate vm;
 extern crate zeroize;
+extern crate backtrace;
 
 pub mod confidential;
 pub mod genesis;

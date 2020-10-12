@@ -4,6 +4,7 @@ use std::sync::Arc;
 use ethcore::{self, state::Account};
 use ethereum_types::{Address, H256};
 use hashdb::HashDB;
+use backtrace::Backtrace;
 
 /// Null backend for parity state.
 ///
@@ -13,6 +14,8 @@ pub struct NullBackend;
 
 impl ethcore::state::backend::Backend for NullBackend {
     fn as_hashdb(&self) -> &dyn HashDB {
+        let bt = Backtrace::new();
+        println!("{:?}", bt);
         unimplemented!("HashDB should never be used");
     }
 
