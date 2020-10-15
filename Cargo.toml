@@ -43,6 +43,8 @@ serde_json = "1.0"
 sha3 = "0.6"
 slog = "2.4.1"
 thiserror = "1.0"
+date_time = "2.1.0"
+chrono = "0.4"
 
 [build-dependencies]
 oasis-core-tools = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.12.1" }
