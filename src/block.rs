@@ -1,6 +1,5 @@
 //! Ethereum block creation.
-use std::{collections::HashSet, sync::Arc};
-
+use super::fund::FundManager;
 use ethcore::{self, state::State, vm::EnvInfo};
 use ethereum_types::{H256, U256};
 use io_context::Context as IoContext;
@@ -12,6 +11,7 @@ use oasis_ethwasi_runtime_common::{
     confidential::ConfidentialCtx, genesis, parity::NullBackend, storage::ThreadLocalMKVS,
 };
 use slog::{info, Logger};
+use std::{collections::HashSet, sync::Arc};
 
 pub struct BlockContext {
     /// Logger.
@@ -75,7 +75,7 @@ impl OasisBatchHandler {
 
     pub fn end_batch(&self, ctx: &mut TxnContext) {
         let ectx = runtime_context!(ctx, BlockContext);
-
+        FundManager::try_unlock(ctx.header.timestamp, &mut ectx.state);
         info!(ectx.logger, "Commiting state into storage");
         ectx.state.commit().expect("state commit must succeed");
         info!(ectx.logger, "Block finalized");
