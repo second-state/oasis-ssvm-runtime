@@ -10,7 +10,7 @@ stack-size = 2097152
 threads = 2
 
 [[bin]]
-name = "oasis-ethwasi-runtime"
+name = "oasis-ssvm-runtime"
 path ="bin/main.rs"
 
 [dependencies]
