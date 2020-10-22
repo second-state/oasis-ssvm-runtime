@@ -4,7 +4,7 @@ set -euo pipefail
 
 oasis_node="${OASIS_CORE_ROOT_PATH}/go/oasis-node/oasis-node"
 oasis_runner="${OASIS_CORE_ROOT_PATH}/go/oasis-net-runner/oasis-net-runner"
-runtime_binary="${RUNTIME_CARGO_TARGET_DIR}/debug/oasis-ethwasi-runtime"
+runtime_binary="${RUNTIME_CARGO_TARGET_DIR}/debug/oasis-ssvm-runtime"
 runtime_loader="${OASIS_CORE_ROOT_PATH}/target/default/debug/oasis-core-runtime-loader"
 runtime_genesis="${GENESIS_ROOT_PATH}/oasis_genesis_testing.json"
 keymanager_binary="${RUNTIME_CARGO_TARGET_DIR}/debug/oasis-ethwasi-runtime-keymanager"
