@@ -26,7 +26,7 @@ use oasis_core_runtime::{
         mkvs::{sync::NoopReadSyncer, Tree},
         StorageContext,
     },
-    transaction::{dispatcher::BatchHandler, Context as TxnContext},
+    transaction::Context as TxnContext,
 };
 
 use io_context::Context as IoContext;
