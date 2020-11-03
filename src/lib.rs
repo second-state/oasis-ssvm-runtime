@@ -7,8 +7,6 @@ extern crate ethkey;
 #[cfg(feature = "test")]
 #[macro_use]
 extern crate serde_json;
-extern crate chrono;
-extern crate date_time;
 
 pub mod block;
 pub mod dispatcher;
