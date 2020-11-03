@@ -75,7 +75,7 @@ impl OasisBatchHandler {
 
     pub fn end_batch(&self, ctx: &mut TxnContext) {
         let ectx = runtime_context!(ctx, BlockContext);
-        FundManager::try_unlock(ctx.header.timestamp, &mut ectx.state);
+        FundManager::try_unlock(ctx.header.timestamp as i64, &mut ectx.state);
         info!(ectx.logger, "Commiting state into storage");
         ectx.state.commit().expect("state commit must succeed");
         info!(ectx.logger, "Block finalized");
