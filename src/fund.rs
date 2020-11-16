@@ -23,21 +23,22 @@ impl FundManager {
     const TICKS_IN_ROUND: i64 = 30 * 24 * 3600;
     /// Factor
     const FACTOR: u32 = 2;
-    /// Initial unlock bucket is 525000000000000000000000 wei.
-    const INITIAL_BUCKET: &'static str = "6F2C4E995EC98E200000";
+    /// Total token amount is 21000000000000000000000000 wei.
+    const TOTAL_AMOUNT: &'static str = "115EEC47F6CF7E35000000";
 
     /// Primary unlock token method
     pub fn try_unlock(current_timestamp: i64, state: &mut State<NullBackend>) -> U256 {
-        // +---------------+-------------------+---------+---------+
-        // | Storage field |       0:23        |  24:27  |  28:32  |
-        // +---------------+-------------------+---------+---------+
-        // |             0 |     reserved      |  init timestamp   |
-        // +---------------+-------------------+-------------------+
-        // |             1 |     reserved      |   pending round   |
-        // +---------------+---------------------------------------+
-        // |             2 |     reserved      |  unlocked ticks   |
-        // +---------------+---------------------------------------+
-
+        // +---------------+-------------------+--------------------+-------------------+
+        // | Storage field |       [0:16)      |       [16:24)      |      [24:32)      |
+        // +---------------+-------------------+--------------------+-------------------+
+        // |             0 |               reserved                 |  init timestamp   |
+        // +---------------+-------------------+--------------------+-------------------+
+        // |             1 |               reserved                 |   pending round   |
+        // +---------------+-------------------+----------------------------------------+
+        // |             2 |               reserved                 |  unlocked ticks   |
+        // +---------------+-------------------+----------------------------------------+
+        // |  (speed up) 3 |     reserved      |       round        |       period      |
+        // +---------------+-------------------+----------------------------------------+
         let beneficiary = Address::from_str(FundManager::BENEFICIARY).unwrap();
 
         // The start time to apply unlock token mechanism.
@@ -57,24 +58,42 @@ impl FundManager {
         let value = state.storage_at(&beneficiary, &H256::from(2)).unwrap();
         let mut unlocked_ticks = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
 
+        // Speed up parameters.
+        // 1. shorten time of the round (default round is 30 days)
+        // 2. shorten cut down period (default period is 20 rounds)
+        let value = state.storage_at(&beneficiary, &H256::from(3)).unwrap();
+        let fraction_r = value.get(16..).unwrap().read_i64::<BigEndian>().unwrap();
+        let ticks_in_round = if fraction_r > 1 {
+            FundManager::TICKS_IN_ROUND / fraction_r
+        } else {
+            FundManager::TICKS_IN_ROUND
+        };
+        let fraction_p = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
+        let period = if fraction_p > 1 {
+            FundManager::PERIOD / fraction_p
+        } else {
+            FundManager::PERIOD
+        };
+
         // The funding used to accumulate unlock amount at this time.
         let mut funding = U256::from(0);
 
         // Expect to unlock to which rounds at this time.
-        let expected_round = (current_timestamp - init_timestamp) / FundManager::TICKS_IN_ROUND;
+        let expected_round = (current_timestamp - init_timestamp) / ticks_in_round;
 
         // The number of times we should decrease unlocks amount cut to 1/2.
         let mut exponent = 0;
 
-        let initial_bucket = U256::from_str(FundManager::INITIAL_BUCKET).unwrap();
+        let initial_bucket = U256::from_str(FundManager::TOTAL_AMOUNT).unwrap()
+            / (U256::from(FundManager::FACTOR) * U256::from(period));
         let mut bucket = initial_bucket;
-        let mut tick_bucket = bucket / U256::from(FundManager::TICKS_IN_ROUND);
+        let mut tick_bucket = bucket / U256::from(ticks_in_round);
         while expected_round >= pending_round {
             // Reduce duplicate calculate action if need. Only re-calculate each 20 rounds.
-            if exponent != pending_round / FundManager::PERIOD {
-                exponent = pending_round / FundManager::PERIOD;
+            if exponent != pending_round / period {
+                exponent = pending_round / period;
                 bucket = initial_bucket / U256::from(FundManager::FACTOR).pow(U256::from(exponent));
-                tick_bucket = bucket / U256::from(FundManager::TICKS_IN_ROUND);
+                tick_bucket = bucket / U256::from(ticks_in_round);
             }
             if expected_round - pending_round >= 1 {
                 // Condition 1
@@ -87,10 +106,10 @@ impl FundManager {
                 // Increase funding by this round tick's count * tick_bucket - already unlocked.
                 let ticks = current_timestamp
                     - init_timestamp
-                    - (FundManager::TICKS_IN_ROUND * pending_round)
+                    - (ticks_in_round * pending_round)
                     - unlocked_ticks;
                 funding = funding + U256::from(ticks) * tick_bucket;
-                unlocked_ticks = (unlocked_ticks + ticks) % FundManager::TICKS_IN_ROUND;
+                unlocked_ticks = (unlocked_ticks + ticks) % ticks_in_round;
                 break;
             }
         }
@@ -373,6 +392,55 @@ mod tests {
             assert_eq!(pending_round, 20);
             assert_eq!(unlocked_ticks, 1);
             assert_eq!(balance, U256::from_str("8af76256333235f27e7b4").unwrap());
+        })
+    }
+
+    #[test]
+    fn test_try_unlock_random_txs_cross_600days_with_speedup_factors() {
+        let untrusted_local = Arc::new(MemoryKeyValue::new());
+        let mut mkvs = Tree::make()
+            .with_capacity(0, 0)
+            .new(Box::new(NoopReadSyncer {}));
+
+        StorageContext::enter(&mut mkvs, untrusted_local, || {
+            let mut state = get_init_state();
+            // Speed up factors
+            // shorten time of the round to original 1/4
+            // shorten cut down period to original 1/2
+            state
+                .set_storage(
+                    &Address::from_str(FundManager::BENEFICIARY).unwrap(),
+                    H256::from(3),
+                    H256::from_str(
+                        "0000000000000000000000000000000000000000000000040000000000000002",
+                    )
+                    .unwrap(),
+                )
+                .unwrap();
+
+            let mut current_timestamp = INIT_TIMESTAMP;
+            let target_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 20 + 1;
+            let mut rng = rand::thread_rng();
+            while current_timestamp != target_timestamp {
+                if current_timestamp + MIN_TX_INTERVAL >= target_timestamp {
+                    current_timestamp = target_timestamp;
+                } else {
+                    current_timestamp =
+                        rng.gen_range(current_timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
+                }
+                FundManager::try_unlock(current_timestamp, &mut state);
+            }
+
+            let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
+            let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
+            let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
+            let value = state.storage_at(&monitor_address, &H256::from(2)).unwrap();
+            let unlocked_ticks = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
+            let balance = state.balance(&monitor_address).unwrap();
+
+            assert_eq!(pending_round, 80);
+            assert_eq!(unlocked_ticks, 1);
+            assert_eq!(balance, U256::from_str("114d8d5bc55564fb157e7b").unwrap());
         })
     }
 }
