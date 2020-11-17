@@ -27,7 +27,7 @@ impl FundManager {
     const TOTAL_AMOUNT: &'static str = "115EEC47F6CF7E35000000";
 
     /// Primary unlock token method
-    pub fn try_unlock(current_timestamp: i64, state: &mut State<NullBackend>) -> U256 {
+    pub fn try_unlock(timestamp: i64, state: &mut State<NullBackend>) -> U256 {
         // +---------------+-------------------+--------------------+-------------------+
         // | Storage field |       [0:16)      |       [16:24)      |      [24:32)      |
         // +---------------+-------------------+--------------------+-------------------+
@@ -46,7 +46,7 @@ impl FundManager {
         let init_timestamp = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
 
         // Error handling because for `cargo test` will generate unpredictable timestamp from other module test cases.
-        if current_timestamp <= init_timestamp {
+        if timestamp <= init_timestamp {
             return U256::from(0);
         }
 
@@ -79,7 +79,7 @@ impl FundManager {
         let mut funding = U256::from(0);
 
         // Expect to unlock to which rounds at this time.
-        let expected_round = (current_timestamp - init_timestamp) / ticks_in_round;
+        let expected_round = (timestamp - init_timestamp) / ticks_in_round;
 
         // The number of times we should decrease unlocks amount cut to 1/2.
         let mut exponent = 0;
@@ -104,10 +104,8 @@ impl FundManager {
             } else {
                 // Condition 2
                 // Increase funding by this round tick's count * tick_bucket - already unlocked.
-                let ticks = current_timestamp
-                    - init_timestamp
-                    - (ticks_in_round * pending_round)
-                    - unlocked_ticks;
+                let ticks =
+                    timestamp - init_timestamp - (ticks_in_round * pending_round) - unlocked_ticks;
                 funding = funding + U256::from(ticks) * tick_bucket;
                 unlocked_ticks = (unlocked_ticks + ticks) % ticks_in_round;
                 break;
@@ -187,10 +185,10 @@ mod tests {
             .new(Box::new(NoopReadSyncer {}));
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
-            // Shift current_timestamp base on init_timestamp with -1 second
-            let current_timestamp = INIT_TIMESTAMP - 1;
+            // Shift timestamp base on init_timestamp with -1 second
+            let timestamp = INIT_TIMESTAMP - 1;
             let mut state = get_init_state();
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            let funding = FundManager::try_unlock(timestamp, &mut state);
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
             let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
@@ -210,10 +208,10 @@ mod tests {
             .new(Box::new(NoopReadSyncer {}));
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
-            // Shift current_timestamp base on init_timestamp with 1 second
-            let current_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS;
+            // Shift timestamp base on init_timestamp with 1 second
+            let timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS;
             let mut state = get_init_state();
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            let funding = FundManager::try_unlock(timestamp, &mut state);
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
             let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
@@ -233,10 +231,10 @@ mod tests {
             .new(Box::new(NoopReadSyncer {}));
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
-            // Shift current_timestamp base on init_timestamp with 300 days (in seconds).
-            let current_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 10;
+            // Shift timestamp base on init_timestamp with 300 days (in seconds).
+            let timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 10;
             let mut state = get_init_state();
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            let funding = FundManager::try_unlock(timestamp, &mut state);
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
             let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
@@ -256,10 +254,10 @@ mod tests {
             .new(Box::new(NoopReadSyncer {}));
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
-            // Shift current_timestamp base on init_timestamp with 3000 days (in seconds).
-            let current_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 100;
+            // Shift timestamp base on init_timestamp with 3000 days (in seconds).
+            let timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 100;
             let mut state = get_init_state();
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            let funding = FundManager::try_unlock(timestamp, &mut state);
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
             let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
@@ -279,10 +277,10 @@ mod tests {
             .new(Box::new(NoopReadSyncer {}));
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
-            // Shift current_timestamp base on init_timestamp with 30000 days (in seconds).
-            let current_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 1000;
+            // Shift timestamp base on init_timestamp with 30000 days (in seconds).
+            let timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 1000;
             let mut state = get_init_state();
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            let funding = FundManager::try_unlock(timestamp, &mut state);
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
             let pending_round = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
@@ -303,13 +301,13 @@ mod tests {
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
             let mut state = get_init_state();
-            // Shift current_timestamp base on init_timestamp with 1..3 seconds.
-            let current_timestamp = INIT_TIMESTAMP + 1;
-            FundManager::try_unlock(current_timestamp, &mut state);
-            let current_timestamp = INIT_TIMESTAMP + 2;
-            FundManager::try_unlock(current_timestamp, &mut state);
-            let current_timestamp = INIT_TIMESTAMP + 3;
-            let funding = FundManager::try_unlock(current_timestamp, &mut state);
+            // Shift timestamp base on init_timestamp with 1..3 seconds.
+            let timestamp = INIT_TIMESTAMP + 1;
+            FundManager::try_unlock(timestamp, &mut state);
+            let timestamp = INIT_TIMESTAMP + 2;
+            FundManager::try_unlock(timestamp, &mut state);
+            let timestamp = INIT_TIMESTAMP + 3;
+            let funding = FundManager::try_unlock(timestamp, &mut state);
 
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
             let value = state.storage_at(&monitor_address, &H256::from(1)).unwrap();
@@ -334,17 +332,16 @@ mod tests {
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
             let mut state = get_init_state();
-            let mut current_timestamp = INIT_TIMESTAMP;
+            let mut timestamp = INIT_TIMESTAMP;
             let target_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 20;
             let mut rng = rand::thread_rng();
-            while current_timestamp != target_timestamp {
-                if current_timestamp + MIN_TX_INTERVAL >= target_timestamp {
-                    current_timestamp = target_timestamp;
+            while timestamp != target_timestamp {
+                if timestamp + MIN_TX_INTERVAL >= target_timestamp {
+                    timestamp = target_timestamp;
                 } else {
-                    current_timestamp =
-                        rng.gen_range(current_timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
+                    timestamp = rng.gen_range(timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
                 }
-                FundManager::try_unlock(current_timestamp, &mut state);
+                FundManager::try_unlock(timestamp, &mut state);
             }
 
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
@@ -369,17 +366,16 @@ mod tests {
 
         StorageContext::enter(&mut mkvs, untrusted_local, || {
             let mut state = get_init_state();
-            let mut current_timestamp = INIT_TIMESTAMP;
+            let mut timestamp = INIT_TIMESTAMP;
             let target_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 20 + 1;
             let mut rng = rand::thread_rng();
-            while current_timestamp != target_timestamp {
-                if current_timestamp + MIN_TX_INTERVAL >= target_timestamp {
-                    current_timestamp = target_timestamp;
+            while timestamp != target_timestamp {
+                if timestamp + MIN_TX_INTERVAL >= target_timestamp {
+                    timestamp = target_timestamp;
                 } else {
-                    current_timestamp =
-                        rng.gen_range(current_timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
+                    timestamp = rng.gen_range(timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
                 }
-                FundManager::try_unlock(current_timestamp, &mut state);
+                FundManager::try_unlock(timestamp, &mut state);
             }
 
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
@@ -418,17 +414,16 @@ mod tests {
                 )
                 .unwrap();
 
-            let mut current_timestamp = INIT_TIMESTAMP;
+            let mut timestamp = INIT_TIMESTAMP;
             let target_timestamp = INIT_TIMESTAMP + SECONDS_OF_30DAYS * 20 + 1;
             let mut rng = rand::thread_rng();
-            while current_timestamp != target_timestamp {
-                if current_timestamp + MIN_TX_INTERVAL >= target_timestamp {
-                    current_timestamp = target_timestamp;
+            while timestamp != target_timestamp {
+                if timestamp + MIN_TX_INTERVAL >= target_timestamp {
+                    timestamp = target_timestamp;
                 } else {
-                    current_timestamp =
-                        rng.gen_range(current_timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
+                    timestamp = rng.gen_range(timestamp + MIN_TX_INTERVAL, target_timestamp + 1);
                 }
-                FundManager::try_unlock(current_timestamp, &mut state);
+                FundManager::try_unlock(timestamp, &mut state);
             }
 
             let monitor_address = Address::from_str(FundManager::BENEFICIARY).unwrap();
