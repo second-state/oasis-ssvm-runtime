@@ -45,8 +45,10 @@ impl FundManager {
         let value = state.storage_at(&beneficiary, &H256::from(0)).unwrap();
         let init_timestamp = value.get(24..).unwrap().read_i64::<BigEndian>().unwrap();
 
-        // Error handling because for `cargo test` will generate unpredictable timestamp from other module test cases.
-        if timestamp <= init_timestamp {
+        // Error handling for two cases.
+        // 1. `cargo test` will generate unpredictable timestamp from other module test cases.
+        // 2. runtime with some empty fileds in genesis file.
+        if timestamp <= init_timestamp || init_timestamp == 0 {
             return U256::from(0);
         }
 
