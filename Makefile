@@ -21,7 +21,8 @@ RUNTIMES := . \
 GENESIS_ROOT_PATH ?= resources/genesis
 GENESIS_FILES ?= \
 	genesis.json \
-	genesis_testing.json
+	genesis_testing.json \
+	genesis_mainnet_testing_ff01.json
 
 # Extra build args.
 EXTRA_BUILD_ARGS := $(if $(RELEASE),--release,)
