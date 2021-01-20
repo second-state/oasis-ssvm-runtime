@@ -1,0 +1,35 @@
+name: build oasis-ssvm-runtime
+
+on:
+  push:
+    branches:
+      - ssvm
+  pull_request:
+    branches:
+      - ssvm
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    container:
+      image: secondstate/oasis-ssvm:latest
+      options: --security-opt apparmor:unconfined --security-opt seccomp=unconfined -e OASIS_UNSAFE_SKIP_AVR_VERIFY=1 -e OASIS_UNSAFE_SKIP_KM_POLICY=1
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup oasis-core
+      run: |
+        cd ..
+        git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.12.4
+        cd -
+        rustup target add x86_64-fortanix-unknown-sgx
+
+    - name: Build oasis-core
+      run: |
+        make -C ../oasis-core
+        make symlink-artifacts OASIS_CORE_SRC_PATH=../oasis-core
+
+    - name: Build oasis-ssvm-runtime
+      run: |
+        make
