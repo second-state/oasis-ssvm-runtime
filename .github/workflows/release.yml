@@ -1,0 +1,63 @@
+name: release oasis-ssvm-runtime
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  create:
+    name: Create Release
+    runs-on: ubuntu-latest
+    container:
+      image: secondstate/oasis-ssvm:latest
+      options: --security-opt apparmor:unconfined --security-opt seccomp=unconfined -e OASIS_UNSAFE_SKIP_AVR_VERIFY=1 -e OASIS_UNSAFE_SKIP_KM_POLICY=1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get version
+        id: prep
+        run: |
+          echo ::set-output name=version::$(git describe --tag)
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: v${{ steps.prep.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Build oasis-core and oasis-ssvm-runtime
+        run: |
+          rustup target add x86_64-fortanix-unknown-sgx
+          echo "##################################################################"
+          rustc --version
+          which rustc
+          which cargo-elf2sgxs
+          echo "##################################################################"
+
+          cd ..
+          git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.12.4
+          cd -
+
+          make -C ../oasis-core
+          make symlink-artifacts OASIS_CORE_SRC_PATH=../oasis-core
+          make
+
+          ./scripts/release.sh
+
+      - name: Upload release package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./oasis-ssvm-runtime.tgz
+          asset_name: oasis-ssvm-runtime-${{ steps.prep.outputs.version }}.tgz
+          asset_content_type: application/x-gzip
