@@ -134,8 +134,8 @@ test-unit: check-oasis-core
 	@$(ECHO) "$(CYAN)*** Running unit tests...$(OFF)"
 	@cargo test \
 		--features test \
-		-p oasis-ethwasi-runtime-common \
-		-p oasis-ethwasi-runtime \
+		-p oasis-ssvm-runtime-common \
+		-p oasis-ssvm-runtime \
 		-p web3-gateway
 	@make -C benchmark test
 

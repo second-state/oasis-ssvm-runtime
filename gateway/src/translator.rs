@@ -31,8 +31,8 @@ use oasis_core_runtime::{
     storage::MKVS,
     transaction::types::{TxnCall, TxnOutput},
 };
-use oasis_ethwasi_runtime_api::{ExecutionResult, TransactionError, METHOD_TX};
-use oasis_ethwasi_runtime_common::{
+use oasis_ssvm_runtime_api::{ExecutionResult, TransactionError, METHOD_TX};
+use oasis_ssvm_runtime_common::{
     genesis, parity::NullBackend, TAG_ETH_LOG_ADDRESS, TAG_ETH_LOG_TOPICS, TAG_ETH_TX_HASH,
 };
 use parity_rpc::v1::types::{

@@ -31,7 +31,7 @@ use super::{
     methods::{check, execute},
 };
 
-use oasis_ethwasi_runtime_api as api;
+use oasis_ssvm_runtime_api as api;
 
 /// Dispatch error.
 #[derive(Error, Debug)]

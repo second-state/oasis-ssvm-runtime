@@ -5,8 +5,8 @@ use oasis_core_runtime::{
     common::version::Version, rak::RAK, version_from_cargo, Protocol, RpcDemux, RpcDispatcher,
     TxnDispatcher,
 };
-use oasis_ethwasi_runtime::dispatcher::Dispatcher;
-use oasis_ethwasi_runtime_keymanager::trusted_policy_signers;
+use oasis_ssvm_runtime::dispatcher::Dispatcher;
+use oasis_ssvm_runtime_keymanager::trusted_policy_signers;
 
 fn main() {
     // Initializer.

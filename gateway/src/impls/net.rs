@@ -17,9 +17,9 @@
 //! Net RPC implementation.
 use jsonrpc_core::Result;
 use lazy_static::lazy_static;
+use oasis_ssvm_runtime_common::genesis;
 use parity_rpc::v1::traits::Net;
 use prometheus::{labels, register_int_counter_vec, IntCounterVec};
-use oasis_ethwasi_runtime_common::genesis;
 
 // Metrics.
 lazy_static! {
@@ -44,7 +44,10 @@ impl NetClient {
 impl Net for NetClient {
     fn version(&self) -> Result<String> {
         NET_RPC_CALLS.with(&labels! {"call" => "version",}).inc();
-        Ok(format!("{}", genesis::SPEC.engine.machine().params().network_id))
+        Ok(format!(
+            "{}",
+            genesis::SPEC.engine.machine().params().network_id
+        ))
     }
 
     fn peer_count(&self) -> Result<String> {

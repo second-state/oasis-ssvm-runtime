@@ -25,7 +25,7 @@ extern crate clap;
 extern crate anyhow;
 extern crate log;
 extern crate oasis_core_runtime;
-extern crate oasis_ethwasi_runtime_common;
+extern crate oasis_ssvm_runtime_common;
 extern crate prometheus;
 extern crate slog;
 extern crate web3_gateway;
@@ -40,7 +40,7 @@ use fdlimit::raise_fd_limit;
 use slog::{error, info};
 
 use oasis_core_runtime::common::logger::{get_logger, init_logger};
-use oasis_ethwasi_runtime_common::MIN_GAS_PRICE_GWEI;
+use oasis_ssvm_runtime_common::MIN_GAS_PRICE_GWEI;
 use web3_gateway::util;
 
 const METRICS_MODE_PULL: &str = "pull";

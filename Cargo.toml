@@ -1,5 +1,5 @@
 [package]
-name = "oasis-ethwasi-runtime"
+name = "oasis-ssvm-runtime"
 version = "0.3.0"
 authors = ["Oasis Labs Inc. <info@oasislabs.com>"]
 edition = "2018"
@@ -15,9 +15,9 @@ path ="bin/main.rs"
 
 [dependencies]
 # Internal.
-oasis-ethwasi-runtime-api = { path = "./api" }
-oasis-ethwasi-runtime-common = { path = "./common" }
-oasis-ethwasi-runtime-keymanager = { path = "./keymanager-runtime" }
+oasis-ssvm-runtime-api = { path = "./api" }
+oasis-ssvm-runtime-common = { path = "./common" }
+oasis-ssvm-runtime-keymanager = { path = "./keymanager-runtime" }
 
 # Oasis core.
 oasis-core-keymanager-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v20.12.4" }
@@ -59,9 +59,9 @@ prefetch = []
 confidential = []
 # Use test feature flag since Rust doesn't support conditional compilation using
 # cfg(test) on dependent crates.
-test = ["oasis-ethwasi-runtime-common/test"]
-benchmarking = ["oasis-ethwasi-runtime-common/benchmarking"]
-production-genesis = ["oasis-ethwasi-runtime-common/production-genesis"]
+test = ["oasis-ssvm-runtime-common/test"]
+benchmarking = ["oasis-ssvm-runtime-common/benchmarking"]
+production-genesis = ["oasis-ssvm-runtime-common/production-genesis"]
 
 [profile.release]
 panic = "abort"

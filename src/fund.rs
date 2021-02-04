@@ -4,7 +4,7 @@ use ethcore::{
     state::{CleanupMode, State},
 };
 use ethereum_types::{Address, H256, U256};
-use oasis_ethwasi_runtime_common::parity::NullBackend;
+use oasis_ssvm_runtime_common::parity::NullBackend;
 use std::str::FromStr;
 
 pub struct FundManager;
@@ -144,7 +144,7 @@ mod tests {
         mkvs::{sync::NoopReadSyncer, Tree},
         StorageContext,
     };
-    use oasis_ethwasi_runtime_common::{
+    use oasis_ssvm_runtime_common::{
         parity::NullBackend,
         storage::{MemoryKeyValue, ThreadLocalMKVS},
     };

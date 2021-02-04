@@ -1581,7 +1581,7 @@ dependencies = [
  "io-context",
  "oasis-core-client",
  "oasis-core-runtime",
- "oasis-ethwasi-runtime-common",
+ "oasis-ssvm-runtime-common",
  "rlp 0.2.1",
  "serde",
  "serde_bytes 0.10.5",
@@ -2860,7 +2860,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oasis-ethwasi-runtime"
+name = "oasis-ssvm-runtime"
 version = "0.3.0"
 dependencies = [
  "anyhow",
@@ -2880,9 +2880,9 @@ dependencies = [
  "oasis-core-keymanager-client",
  "oasis-core-runtime",
  "oasis-core-tools",
- "oasis-ethwasi-runtime-api",
- "oasis-ethwasi-runtime-common",
- "oasis-ethwasi-runtime-keymanager",
+ "oasis-ssvm-runtime-api",
+ "oasis-ssvm-runtime-common",
+ "oasis-ssvm-runtime-keymanager",
  "rand 0.7.3",
  "serde_bytes 0.11.5",
  "serde_json",
@@ -2893,7 +2893,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oasis-ethwasi-runtime-api"
+name = "oasis-ssvm-runtime-api"
 version = "0.2.0"
 dependencies = [
  "ethereum-types 0.3.2",
@@ -2905,7 +2905,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oasis-ethwasi-runtime-common"
+name = "oasis-ssvm-runtime-common"
 version = "0.3.0"
 dependencies = [
  "anyhow",
@@ -2923,7 +2923,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "oasis-ethwasi-runtime-keymanager"
+name = "oasis-ssvm-runtime-keymanager"
 version = "0.3.0-alpha"
 dependencies = [
  "oasis-core-keymanager-api-common",
@@ -5266,8 +5266,8 @@ dependencies = [
  "oasis-core-client",
  "oasis-core-keymanager-client",
  "oasis-core-runtime",
- "oasis-ethwasi-runtime-api",
- "oasis-ethwasi-runtime-common",
+ "oasis-ssvm-runtime-api",
+ "oasis-ssvm-runtime-common",
  "parity-reactor",
  "parity-rpc",
  "parking_lot 0.5.5",

@@ -10,9 +10,9 @@ use oasis_core_runtime::{
     runtime_context,
     transaction::{dispatcher::CheckOnlySuccess, Context as TxnContext},
 };
-use oasis_ethwasi_runtime_api::{ExecutionResult, LogEntry, TransactionError};
+use oasis_ssvm_runtime_api::{ExecutionResult, LogEntry, TransactionError};
 #[cfg_attr(feature = "test", allow(unused))]
-use oasis_ethwasi_runtime_common::{
+use oasis_ssvm_runtime_common::{
     genesis, BLOCK_GAS_LIMIT, MIN_GAS_PRICE_GWEI, TAG_ETH_LOG_ADDRESS, TAG_ETH_LOG_TOPICS,
     TAG_ETH_TX_HASH,
 };
@@ -41,8 +41,12 @@ pub mod check {
         }
 
         // Verify chain id
-        match signed.verify_basic(true, Some(genesis::SPEC.engine.machine().params().chain_id), false) {
-            Ok(_) => {},
+        match signed.verify_basic(
+            true,
+            Some(genesis::SPEC.engine.machine().params().chain_id),
+            false,
+        ) {
+            Ok(_) => {}
             Err(_) => return Err(TransactionError::InvalidChainId.into()),
         }
 

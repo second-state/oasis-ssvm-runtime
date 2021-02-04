@@ -35,7 +35,7 @@ docker_plugin: &docker_plugin_configuration
 steps:
   - label: Audit Rust dependencies for vulnerabilities
     command: .buildkite/rust/cargo_audit.sh
-    # https://github.com/oasislabs/oasis-ethwasi-runtime/issues/1016
+    # https://github.com/oasislabs/oasis-ssvm-runtime/issues/1016
     soft_fail: true
     plugins:
       <<: *docker_plugin_configuration
@@ -71,7 +71,7 @@ steps:
       # This is done here to keep the build and test
       # script generic.
       - cd /var/tmp/artifacts/debug
-      - buildkite-agent artifact upload oasis-ethwasi-runtime
+      - buildkite-agent artifact upload oasis-ssvm-runtime
     env:
       RUNTIME_VARIANT: elf
     agents:
@@ -87,7 +87,7 @@ steps:
       # This is done here to keep the build and test
       # script generic.
       - cd /var/tmp/artifacts/x86_64-fortanix-unknown-sgx/debug
-      - buildkite-agent artifact upload oasis-ethwasi-runtime.sgxs
+      - buildkite-agent artifact upload oasis-ssvm-runtime.sgxs
     env:
       RUNTIME_VARIANT: sgxs
     agents:
@@ -102,7 +102,7 @@ steps:
 
       # Upload the built artifacts.
       - cd /var/tmp/artifacts/debug
-      - buildkite-agent artifact upload oasis-ethwasi-runtime-keymanager
+      - buildkite-agent artifact upload oasis-ssvm-runtime-keymanager
     env:
       RUNTIME_VARIANT: elf
     agents:
@@ -117,7 +117,7 @@ steps:
 
       # Upload the built artifacts.
       - cd /var/tmp/artifacts/x86_64-fortanix-unknown-sgx/debug
-      - buildkite-agent artifact upload oasis-ethwasi-runtime-keymanager.sgxs
+      - buildkite-agent artifact upload oasis-ssvm-runtime-keymanager.sgxs
     env:
       RUNTIME_VARIANT: sgxs
     agents:
@@ -171,7 +171,7 @@ steps:
   - wait
 
   - label: ":rocket: Build docker image context"
-    trigger: oasis-ethwasi-runtime-build-image-context
+    trigger: oasis-ssvm-runtime-build-image-context
     async: true
     branches: master
     build:
