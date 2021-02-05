@@ -1,18 +1,30 @@
 #!/bin/bash
+# Usage:
+#   RUNTIME_BUILD_DIR=/path/to/target/maybe-sgx-triple/(mode=debug|release) \
+#   GATEWAY_BUILD_DIR=/path/to/target/default/mode \
+#   GENESIS_ROOT_PATH=/path/to/resources/genesis \
+#   gateway.sh
 
 set -euo pipefail
 
+sgxs=""
+tee_hardware=""
+if [[ "${RUNTIME_BUILD_DIR}" == *"sgx"* ]]; then
+    sgxs=".sgxs"
+    tee_hardware="--fixture.default.tee_hardware intel-sgx"
+fi
+
 oasis_node="${OASIS_CORE_ROOT_PATH}/go/oasis-node/oasis-node"
 oasis_runner="${OASIS_CORE_ROOT_PATH}/go/oasis-net-runner/oasis-net-runner"
-runtime_binary="${RUNTIME_CARGO_TARGET_DIR}/debug/oasis-ssvm-runtime"
 runtime_loader="${OASIS_CORE_ROOT_PATH}/target/default/debug/oasis-core-runtime-loader"
+keymanager_binary="${RUNTIME_BUILD_DIR}/oasis-ssvm-runtime-keymanager${sgxs}"
+runtime_binary="${RUNTIME_BUILD_DIR}/oasis-ssvm-runtime${sgxs}"
 runtime_genesis="${GENESIS_ROOT_PATH}/oasis_genesis_testing.json"
-keymanager_binary="${RUNTIME_CARGO_TARGET_DIR}/debug/oasis-ssvm-runtime-keymanager"
-web3_gateway="${RUNTIME_CARGO_TARGET_DIR}/debug/gateway"
+web3_gateway="${GATEWAY_BUILD_DIR:-${RUNTIME_BUILD_DIR}}/gateway"
 
 # Prepare an empty data directory.
 data_dir="/var/tmp/oasis-ssvm-runtime-runner"
-rm -rf "${data_dir}"
+rm -rf "${data_dir}/net-runner/network"
 mkdir -p "${data_dir}"
 chmod -R go-rwx "${data_dir}"
 client_socket="${data_dir}/net-runner/network/client-0/internal.sock"
@@ -20,6 +32,7 @@ client_socket="${data_dir}/net-runner/network/client-0/internal.sock"
 # Dump
 echo "Dump fixture."
 ${oasis_runner} dump-fixture \
+    ${tee_hardware} \
     --fixture.default.node.binary ${oasis_node} \
     --fixture.default.runtime.binary ${runtime_binary} \
     --fixture.default.runtime.loader ${runtime_loader} \

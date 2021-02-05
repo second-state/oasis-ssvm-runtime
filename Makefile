@@ -24,8 +24,12 @@ GENESIS_FILES ?= \
 	genesis_testing.json \
 	genesis_mainnet_testing_ff01.json
 
-# Extra build args.
-EXTRA_BUILD_ARGS := $(if $(RELEASE),--release,)
+ifdef RELEASE
+EXTRA_BUILD_ARGS := --release
+CARGO_BUILD_MODE := release
+else
+CARGO_BUILD_MODE := debug
+endif
 
 # Extra args specifically for cargo build.
 CARGO_BUILD_ARGS := $(if $(BENCHMARKS),--features benchmarking,)
@@ -119,14 +123,13 @@ benchmark: genesis
 
 run-gateway:
 	@$(ECHO) "$(CYAN)*** Starting Oasis Network Runner and Web3 gateway...$(OFF)"
-	@export OASIS_CORE_ROOT_PATH=$(OASIS_CORE_ROOT_PATH) RUNTIME_CARGO_TARGET_DIR=$(RUNTIME_CARGO_TARGET_DIR) GENESIS_ROOT_PATH=$(GENESIS_ROOT_PATH) && \
+	@export OASIS_CORE_ROOT_PATH=$(OASIS_CORE_ROOT_PATH) RUNTIME_BUILD_DIR=$(RUNTIME_CARGO_TARGET_DIR)/$(CARGO_BUILD_MODE) GENESIS_ROOT_PATH=$(GENESIS_ROOT_PATH) && \
 		scripts/gateway.sh 2>&1 | python scripts/color-log.py
 
-# TODO: update gateway.sh to support SGX
-#run-gateway-sgx:
-#	@$(ECHO) "$(CYAN)*** Starting oasis-core node and Web3 gateway (SGX)...$(OFF)"
-#	@export OASIS_CORE_ROOT_PATH=$(OASIS_CORE_ROOT_PATH) RUNTIME_CARGO_TARGET_DIR=$(RUNTIME_CARGO_TARGET_DIR) && \
-#		scripts/gateway.sh single_node_sgx 2>&1 | python scripts/color-log.py
+run-gateway-sgx:
+	@$(ECHO) "$(CYAN)*** Starting oasis-core node and Web3 gateway (SGX)...$(OFF)"
+	@export OASIS_CORE_ROOT_PATH=$(OASIS_CORE_ROOT_PATH) RUNTIME_BUILD_DIR=$(RUNTIME_SGX_CARGO_TARGET_DIR)/x86_64-fortanix-unknown-sgx/$(CARGO_BUILD_MODE) GATEWAY_BUILD_DIR=$(RUNTIME_CARGO_TARGET_DIR)/$(CARGO_BUILD_MODE) GENESIS_ROOT_PATH=$(GENESIS_ROOT_PATH) && \
+		scripts/gateway.sh 2>&1 | python scripts/color-log.py
 
 test: test-unit test-e2e
 
