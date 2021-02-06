@@ -24,20 +24,58 @@ docker pull secondstate/oasis-ssvm
 - Get source code from Github.
 
 ```bash
-git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.9
 git clone https://github.com/second-state/oasis-ssvm-runtime.git --branch ssvm
+git clone https://github.com/oasisprotocol/oasis-core.git \
+      --branch "v$(cat oasis-ssvm-runtime/OASIS_CORE_VERSION)"
 ```
 
-## Launch Environment
-Attach shell to container, bind volume with repositories' path and specific in non-SGX environment.
+### SGX
+
+If you want to test a confidential deployment of the runtime, you'll need
+Ubuntu 18.04* running on SGX hardware. If you don't already have an SGX machine,
+[Azure DC VMs](https://docs.microsoft.com/en-us/azure/virtual-machines/dcv2-series)
+are an easy option.
+
+To set up your machine, run the following commands.
 
 ```bash
+# Configure source for pre-built SGX packages.
+echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add -
+
+# Install (non-DCAP) SGX driver. It has to be non-DCAP.
+# Newer versions can be found at https://download.01.org/intel-sgx/sgx-linux/
+wget https://download.01.org/intel-sgx/sgx-linux/2.12/distro/ubuntu18.04-server/sgx_linux_x64_driver_2.11.0_4505f07.bin -O sgx_linux_x64_driver.bin
+chmod +x sgx_linux_x64_driver.bin
+sudo ./sgx_linux_x64_driver.bin
+
+# Install SGX architectural enclaves and plugins.
+sudo apt-get update
+sudo apt-get install libsgx-epid
+```
+
+*Intel provides prebuilt packages for any LTS, but 18.04 is best tested.
+
+## Launch Environment
+
+Attach shell to container, bind volume with repositories' path and debug environment variables.
+
+```bash
+if [[ -c /dev/isgx && -S /var/run/aesmd/aesm.socket ]]; then
+  export SGX_DOCKER_RUN_FLAGS=(\
+    "-e" "OASIS_UNSAFE_ALLOW_DEBUG_ENCLAVES=1" \
+    "-e" "OASIS_UNSAFE_KM_POLICY_KEYS=1" \
+    "-v" "/var/run/aesmd:/var/run/aesmd" \
+    "--device" "/dev/isgx")
+fi
+
 docker run -it --rm \
   --name oasis-ssvm \
   --security-opt apparmor:unconfined \
   --security-opt seccomp=unconfined \
   -e OASIS_UNSAFE_SKIP_AVR_VERIFY=1 \
   -e OASIS_UNSAFE_SKIP_KM_POLICY=1 \
+  ${SGX_DOCKER_RUN_FLAGS} \
   -v $(pwd):/root/code \
   -w /root/code \
   secondstate/oasis-ssvm \
@@ -52,10 +90,10 @@ rustup target add x86_64-fortanix-unknown-sgx
 make -C ../oasis-core
 make symlink-artifacts OASIS_CORE_SRC_PATH=../oasis-core
 make
-make run-gateway
+make run-gateway # or run-gateway-sgx
 ```
 
-(wati for running gateway finish, maybe need more than 30 seconds)
+(wait for running gateway finish, maybe need more than 30 seconds)
 
 The result should be the same as the following content.
 
@@ -63,6 +101,8 @@ The result should be the same as the following content.
  INFO  gateway/main > Starting the web3 gateway
  INFO  gateway/execute > Waiting for the Oasis Core node to be fully synced
  INFO  gateway/execute > Oasis Core node is fully synced, proceeding with initialization
+ INFO  gateway/execute > Starting WS server conf=...
+ INFO  gateway/execute > Starting HTTP server conf=...
  INFO  gateway/main    > Web3 gateway is running
 ```
 
