@@ -23,7 +23,8 @@ GENESIS_FILES ?= \
 	genesis.json \
 	genesis_testing.json \
 	genesis_mainnet_testing_ff01.json \
-	genesis_mainnet_testing_ff02.json
+	genesis_mainnet_testing_ff02.json \
+	genesis_mainnet_testing_ff03.json
 
 # Extra build args.
 EXTRA_BUILD_ARGS := $(if $(RELEASE),--release,)
