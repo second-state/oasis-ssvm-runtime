@@ -24,7 +24,7 @@ docker pull secondstate/oasis-ssvm
 - Get source code from Github.
 
 ```bash
-git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.12.4
+git clone https://github.com/oasisprotocol/oasis-core.git --branch v20.12.5
 git clone https://github.com/second-state/oasis-ssvm-runtime.git --branch ssvm
 ```
 
@@ -92,7 +92,7 @@ docker exec -it oasis-ssvm bash
 and
 
 ```bash
-node ~/code/oasis-runtime/resources/erc20/erc20.js
+node ~/code/oasis-ssvm-runtime/resources/erc20/erc20.js
 ```
 
 The result should be the same as the following content.
