@@ -16,7 +16,7 @@ impl FundManager {
     // Here we use 1 round denote 30 days (represent 1 month).
 
     /// Unlock address.
-    const BENEFICIARY: &'static str = "22aa096E896e16c0B99bdb93D6084C947c3bddAB";
+    const BENEFICIARY: &'static str = "7110316b618d20d0c44728ac2a3d683536ea682b";
     /// Adjust unlock amount period.
     const PERIOD: i64 = 20;
     /// Ticks means seconds in 30 days.
