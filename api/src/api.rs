@@ -1,6 +1,6 @@
 use ethereum_types::{Address, Bloom, H256, U256};
 use oasis_core_runtime::runtime_api;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 // used in runtime_api! macro

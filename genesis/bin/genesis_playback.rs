@@ -7,7 +7,7 @@ extern crate ethereum_types;
 extern crate filebuffer;
 extern crate hex;
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;
 extern crate grpcio;
 extern crate io_context;
 extern crate oasis_core_client;
