@@ -6,8 +6,8 @@ authors = ["Oasis Labs Inc. <info@oasislabs.com>"]
 [dependencies]
 oasis-ethwasi-runtime-common = { path = "../common" }
 
-oasis-core-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.0.1" }
-oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.0.1" }
+oasis-core-client = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.1.1" }
+oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.1.1" }
 
 clap = "2.29.1"
 ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
@@ -15,10 +15,9 @@ filebuffer = "0.4.0"
 hex = "0.3.1"
 rlp = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
 ethcore = { git = "https://github.com/second-state/oasis-parity", branch = "ssvm" }
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
-serde_bytes = "~0.10"
+serde = { version = "1.0.125", features = ["derive"] }
+serde_json = "1.0.64"
+serde_bytes = "0.11.5"
 grpcio = "0.4.4"
 io-context = "0.2.0"
 

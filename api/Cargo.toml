@@ -5,10 +5,9 @@ authors = ["Oasis Labs Inc. <info@oasislabs.com>"]
 edition = "2018"
 
 [dependencies]
-oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.0.1" }
+oasis-core-runtime = { git = "https://github.com/oasisprotocol/oasis-core", tag = "v21.1.1" }
 
 ethereum-types = { version = "0.3", default-features = false, features = ["std", "serialize"] }
-serde = "1.0.71"
-serde_bytes = "~0.10"
-serde_derive = "1.0"
+serde = { version = "1.0.125", features = ["derive"] }
+serde_bytes = "0.11.5"
 thiserror = "1.0"

@@ -23,7 +23,7 @@ extern crate lazy_static;
 extern crate log;
 extern crate parking_lot;
 #[macro_use]
-extern crate serde_derive;
+extern crate serde;
 extern crate jsonrpc_core;
 #[macro_use]
 extern crate jsonrpc_macros;

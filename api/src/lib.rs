@@ -2,7 +2,6 @@ extern crate ethereum_types;
 extern crate oasis_core_runtime;
 extern crate serde;
 extern crate serde_bytes;
-extern crate serde_derive;
 
 #[macro_use]
 mod api;
