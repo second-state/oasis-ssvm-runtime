@@ -24,7 +24,7 @@ docker pull secondstate/oasis-ssvm
 - Get source code from Github.
 
 ```bash
-git clone https://github.com/oasisprotocol/oasis-core.git --branch v21.1
+git clone https://github.com/oasisprotocol/oasis-core.git --branch v21.1.1
 git clone https://github.com/second-state/oasis-ssvm-runtime.git --branch ssvm
 ```
 
